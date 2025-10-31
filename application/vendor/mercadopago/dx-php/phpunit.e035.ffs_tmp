@@ -1,0 +1,1749 @@
+#!/usr/bin/env php
+<?php
+if (version_compare('7.0.0', PHP_VERSION, '>')) {
+    fwrite(
+        STDERR,
+        sprintf(
+            'PHPUnit 6.2.1 by Sebastian Bergmann and contributors.' . PHP_EOL . PHP_EOL .
+            'This version of PHPUnit is supported on PHP 7.0 and PHP 7.1.' . PHP_EOL .
+            'You are using PHP %s (%s).' . PHP_EOL,
+            PHP_VERSION,
+            PHP_BINARY
+        )
+    );
+
+    die(1);
+}
+
+if (__FILE__ == realpath($GLOBALS['_SERVER']['SCRIPT_NAME'])) {
+    $execute = true;
+} else {
+    $execute = false;
+}
+
+define('__PHPUNIT_PHAR__', str_replace(DIRECTORY_SEPARATOR, '/', __FILE__));
+define('__PHPUNIT_PHAR_ROOT__', 'phar://phpunit-6.2.1.phar');
+
+Phar::mapPhar('phpunit-6.2.1.phar');
+
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/DeepCopy.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Exception/CloneException.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Filter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineCollectionFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineEmptyCollectionFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineProxyFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/KeepFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/ReplaceFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Filter/SetNullFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/Matcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/Doctrine/DoctrineProxyMatcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/PropertyMatcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/PropertyNameMatcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Matcher/PropertyTypeMatcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/Reflection/ReflectionHelper.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/TypeFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/ReplaceFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/ShallowCopyFilter.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/TypeFilter/Spl/SplDoublyLinkedList.php';
+require 'phar://phpunit-6.2.1.phar' . '/myclabs-deep-copy/DeepCopy/TypeMatcher/TypeMatcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Exception/ExceptionInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Exception/UnexpectedValueException.php';
+require 'phar://phpunit-6.2.1.phar' . '/doctrine-instantiator/Doctrine/Instantiator/InstantiatorInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/doctrine-instantiator/Doctrine/Instantiator/Instantiator.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-file-iterator/Iterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-file-iterator/Facade.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-file-iterator/Factory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Assert.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/SelfDescribing.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/AssertionFailedError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/TestListener.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/BaseTestListener.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/CodeCoverageException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/Constraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ArrayHasKey.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ArraySubset.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/Composite.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/Attribute.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/Callback.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ClassHasAttribute.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ClassHasStaticAttribute.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/Count.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/DirectoryExists.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ExceptionCode.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ExceptionMessage.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ExceptionMessageRegularExpression.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/FileExists.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/GreaterThan.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsAnything.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsEmpty.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsEqual.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsFalse.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsFinite.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsIdentical.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsInfinite.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsInstanceOf.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsJson.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsNan.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsNull.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsReadable.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsTrue.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsType.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/IsWritable.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/JsonMatches.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/JsonMatchesErrorMessageProvider.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/LessThan.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/LogicalAnd.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/LogicalNot.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/LogicalOr.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/LogicalXor.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/ObjectHasAttribute.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/RegularExpression.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/SameSize.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/StringContains.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/StringEndsWith.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/StringMatchesFormatDescription.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/StringStartsWith.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/TraversableContains.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Constraint/TraversableContainsOnly.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/RiskyTest.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/RiskyTestError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/CoveredCodeNotExecutedException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Test.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/TestSuite.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/DataProviderTestSuite.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Error/Error.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Error/Deprecated.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Error/Notice.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Error/Warning.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/ExceptionWrapper.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/ExpectationFailedException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/IncompleteTest.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/TestCase.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/IncompleteTestCase.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/IncompleteTestError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/InvalidCoversTargetException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/MissingCoversAnnotationException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/OutputError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/SkippedTest.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/SkippedTestCase.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/SkippedTestError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/SkippedTestSuiteError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/SyntheticError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/TestFailure.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/TestResult.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/TestSuiteIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/UnintentionallyCoveredCodeError.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/Warning.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Framework/WarningTestCase.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/BaseTestRunner.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Filter/GroupFilterIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Filter/ExcludeGroupFilterIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Filter/Factory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Filter/IncludeGroupFilterIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Filter/NameFilterIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/PhptTestCase.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/TestSuiteLoader.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/StandardTestSuiteLoader.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Runner/Version.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/TextUI/Command.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Printer.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/TextUI/ResultPrinter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/TextUI/TestRunner.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Blacklist.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Configuration.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/ConfigurationGenerator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/ErrorHandler.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Fileloader.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Filesystem.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Filter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Getopt.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/GlobalState.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/InvalidArgumentHelper.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Log/JUnit.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Log/TeamCity.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/PHP/AbstractPhpProcess.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/PHP/DefaultPhpProcess.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/PHP/WindowsPhpProcess.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/RegularExpression.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Test.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/TestDox/ResultPrinter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/TestDox/HtmlResultPrinter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/TestDox/NamePrettifier.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/TestDox/TextResultPrinter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/TestDox/XmlResultPrinter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Type.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit/Util/Xml.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Exception/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Exception/BadMethodCallException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/Identity.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/Stub.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/Match.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/ParametersMatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/MethodNameMatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/InvocationMocker.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Builder/Namespace.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Generator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Invocation.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/MatcherCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Verifiable.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Invokable.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/InvocationMocker.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Invocation/Static.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Invocation/Object.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/Invocation.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/InvokedRecorder.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/AnyInvokedCount.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/StatelessInvocation.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/AnyParameters.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/ConsecutiveParameters.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/InvokedAtIndex.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/InvokedAtLeastCount.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/InvokedAtLeastOnce.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/InvokedAtMostCount.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/InvokedCount.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/MethodName.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Matcher/Parameters.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/MockBuilder.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/MockObject.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Exception/RuntimeException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/ConsecutiveCalls.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/Return.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/ReturnArgument.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/ReturnCallback.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/ReturnReference.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/ReturnSelf.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpunit-mock-objects/Stub/ReturnValueMap.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-invoker/Invoker.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-invoker/TimeoutException.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-timer/Timer.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-token-stream/Token.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-token-stream/Token/Stream.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-token-stream/Token/Stream/CachingFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Type.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Application.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/ApplicationName.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Author.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/AuthorCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/AuthorCollectionIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ManifestElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/AuthorElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ElementCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/AuthorElementCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/BundledComponent.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/BundledComponentCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/BundledComponentCollectionIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/BundlesElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ComponentElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ComponentElementCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ContainsElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/CopyrightElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/CopyrightInformation.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Email.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ExtElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ExtElementCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Extension.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ExtensionElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/InvalidApplicationNameException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/InvalidEmailException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/InvalidUrlException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Library.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/License.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/LicenseElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Manifest.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ManifestDocument.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/ManifestDocumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/ManifestDocumentLoadingException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/ManifestDocumentMapper.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/ManifestDocumentMapperException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/ManifestElementException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/ManifestLoader.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/exceptions/ManifestLoaderException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/ManifestSerializer.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/PhpElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Requirement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/PhpExtensionRequirement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/PhpVersionRequirement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/RequirementCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/RequirementCollectionIterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/xml/RequiresElement.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-manifest/values/Url.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/VersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/AbstractVersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/AndVersionConstraintGroup.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/AnyVersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/ExactVersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/GreaterThanOrEqualToVersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/InvalidVersionException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/OrVersionConstraintGroup.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/PreReleaseSuffix.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/SpecificMajorAndMinorVersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/SpecificMajorVersionConstraint.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/UnsupportedVersionConstraintException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/Version.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/VersionConstraintParser.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/VersionConstraintValue.php';
+require 'phar://phpunit-6.2.1.phar' . '/phar-io-version/VersionNumber.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/ArgumentsWildcard.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/TokenInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/AnyValueToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/AnyValuesToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ApproximateValueToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ArrayCountToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ArrayEntryToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ArrayEveryEntryToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/CallbackToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ExactValueToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/IdenticalValueToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/LogicalAndToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/LogicalNotToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/ObjectStateToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/StringContainsToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Argument/Token/TypeToken.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Call/Call.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Call/CallCenter.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/Comparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Comparator/ClosureComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/Factory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Comparator/Factory.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/ArrayComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/ObjectComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Comparator/ProphecyComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Doubler.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/CachedDoubler.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ClassPatchInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/DisableConstructorPatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/HhvmExceptionPatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/KeywordPatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/MagicCallPatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ProphecySubjectPatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/ReflectionClassNewInstancePatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/SplFileInfoPatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/ClassPatch/TraversablePatch.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/DoubleInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ClassCodeGenerator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ClassCreator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ClassMirror.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/Node/ArgumentNode.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/Node/ClassNode.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/Node/MethodNode.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/Generator/ReflectionInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/LazyDouble.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Doubler/NameGenerator.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prophecy/ProphecyException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prophecy/ObjectProphecyException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Call/UnexpectedCallException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/DoublerException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ClassCreatorException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ClassMirrorException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/DoubleException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ClassNotFoundException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/InterfaceNotFoundException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotExtendableException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotFoundException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Doubler/ReturnByReferenceException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/PredictionException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/AggregateException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/FailedPredictionException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prophecy/MethodProphecyException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/NoCallsException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsCountException.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/MethodTagRetrieverInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/ClassAndInterfaceTagRetriever.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/ClassTagRetriever.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/PhpDocumentor/LegacyClassTagRetriever.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prediction/PredictionInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prediction/CallPrediction.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prediction/CallTimesPrediction.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prediction/CallbackPrediction.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prediction/NoCallsPrediction.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Promise/PromiseInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Promise/CallbackPromise.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Promise/ReturnArgumentPromise.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Promise/ReturnPromise.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Promise/ThrowPromise.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophecy/MethodProphecy.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophecy/ProphecyInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophecy/ObjectProphecy.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophecy/ProphecySubjectInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophecy/RevealerInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophecy/Revealer.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Prophet.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Util/ExportUtil.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpspec-prophecy/Prophecy/Util/StringUtil.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/CodeCoverage.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Exception/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Exception/RuntimeException.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Exception/CoveredCodeNotExecutedException.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Driver/Driver.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Driver/Xdebug.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Driver/HHVM.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Driver/PHPDBG.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Filter.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Exception/InvalidArgumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Exception/MissingCoversAnnotationException.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Node/AbstractNode.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Node/Builder.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Node/Directory.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Node/File.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Node/Iterator.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Clover.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Crap4j.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Html/Renderer.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Html/Renderer/Dashboard.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Html/Renderer/Directory.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Html/Facade.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Html/Renderer/File.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/PHP.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Text.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/BuildInformation.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Coverage.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Node.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Directory.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Facade.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/File.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Method.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Project.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Report.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Source.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Tests.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Totals.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Report/Xml/Unit.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Exception/UnintentionallyCoveredCodeException.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Util.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-code-coverage/Version.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-code-unit-reverse-lookup/Wizard.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/ComparisonFailure.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/DOMNodeComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/DateTimeComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/ScalarComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/NumericComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/DoubleComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/ExceptionComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/MockObjectComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/ResourceComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/SplObjectStorageComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-comparator/TypeComparator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/Chunk.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/Diff.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/Differ.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/LCS/LongestCommonSubsequence.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/LCS/MemoryEfficientLongestCommonSubsequenceImplementation.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/LCS/TimeEfficientLongestCommonSubsequenceImplementation.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/Line.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-diff/Parser.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-environment/Console.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-environment/Runtime.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-exporter/Exporter.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-global-state/Blacklist.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-global-state/CodeExporter.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-global-state/exceptions/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-global-state/Restorer.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-global-state/exceptions/RuntimeException.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-global-state/Snapshot.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-object-enumerator/Enumerator.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-object-enumerator/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-object-enumerator/InvalidArgumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-object-reflector/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-object-reflector/InvalidArgumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-object-reflector/ObjectReflector.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-recursion-context/Context.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-recursion-context/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-recursion-context/InvalidArgumentException.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-resource-operations/ResourceOperations.php';
+require 'phar://phpunit-6.2.1.phar' . '/sebastian-version/Version.php';
+require 'phar://phpunit-6.2.1.phar' . '/php-text-template/Template.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/Exception.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/NamespaceUri.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/NamespaceUriException.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/Token.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/TokenCollection.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/TokenCollectionException.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/Tokenizer.php';
+require 'phar://phpunit-6.2.1.phar' . '/theseer-tokenizer/XMLSerializer.php';
+require 'phar://phpunit-6.2.1.phar' . '/webmozart-assert/Assert.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlockFactoryInterface.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlockFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Description.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/DescriptionFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Serializer.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/TagFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/StandardTagFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tag.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/StaticMethod.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/BaseTag.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Author.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Covers.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Deprecated.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Example.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/Strategy.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter/PassthroughFormatter.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Generic.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Link.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Method.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Param.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Property.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyRead.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyWrite.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Return_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/See.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Since.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Source.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Throws.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Uses.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Var_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/Tags/Version.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-common/Element.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-docblock/DocBlock/ExampleFinder.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-common/File.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-common/Fqsen.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/FqsenResolver.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-common/Location.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-common/Project.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-reflection-common/ProjectFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Type.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/TypeResolver.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Array_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Boolean.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Callable_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Compound.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Context.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/ContextFactory.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Float_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Integer.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Mixed.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Null_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Object_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Resource.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Scalar.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Self_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Static_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/String_.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/This.php';
+require 'phar://phpunit-6.2.1.phar' . '/phpdocumentor-type-resolver/Types/Void_.php';
+
+if ($execute) {
+    if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == '--manifest') {
+        print file_get_contents(__PHPUNIT_PHAR_ROOT__ . '/manifest.txt');
+        exit;
+    }
+
+    PHPUnit\TextUI\Command::main();
+}
+
+__HALT_COMPILER(); ?>
+∑®  C         phpunit-6.2.1.phar       manifest.txtj  Y1Yj  ±L∂         ca.pemÒ  Y1YÒ  ãbyÎ∂         php-code-coverage/LICENSE  Y1Y  –âxZ∂      "   php-code-coverage/CodeCoverage.phpÚy  Y1YÚy  Z¯¡∂      #   php-code-coverage/Driver/Driver.php  Y1Y  é êÓ∂      !   php-code-coverage/Driver/HHVM.phpÉ  Y1YÉ  ’Ü7∂      #   php-code-coverage/Driver/PHPDBG.php]  Y1Y]  ”î”∂      #   php-code-coverage/Driver/Xdebug.phpŸ
+  Y1YŸ
+  ˇÚá∂      ?   php-code-coverage/Exception/CoveredCodeNotExecutedException.php∞  Y1Y∞  /›/†∂      )   php-code-coverage/Exception/Exception.php~  Y1Y~  õ¸u∂      8   php-code-coverage/Exception/InvalidArgumentException.phpÁ  Y1YÁ  óNÀ∂      @   php-code-coverage/Exception/MissingCoversAnnotationException.php¥  Y1Y¥  ºfM∂      0   php-code-coverage/Exception/RuntimeException.phpp  Y1Yp  w©C∂      C   php-code-coverage/Exception/UnintentionallyCoveredCodeException.php¨  Y1Y¨  ˝Fñ+∂         php-code-coverage/Filter.php€  Y1Y€  ¡÷ ∂      '   php-code-coverage/Node/AbstractNode.phpü  Y1Yü  å_≈∂      "   php-code-coverage/Node/Builder.phpf  Y1Yf  rûû∂      $   php-code-coverage/Node/Directory.phpÂ&  Y1YÂ&  ”kÍ∂         php-code-coverage/Node/File.phpwL  Y1YwL  oÉ8Ì∂      #   php-code-coverage/Node/Iterator.php¨  Y1Y¨  9ñ‹Q∂      #   php-code-coverage/Report/Clover.phpÁ&  Y1YÁ&  1∂      #   php-code-coverage/Report/Crap4j.phpà  Y1Yà  qroÇ∂      (   php-code-coverage/Report/Html/Facade.php'  Y1Y'  W
+’∂      *   php-code-coverage/Report/Html/Renderer.phpe"  Y1Ye"  ó∞†∂      4   php-code-coverage/Report/Html/Renderer/Dashboard.phpm&  Y1Ym&  !mu∂      4   php-code-coverage/Report/Html/Renderer/Directory.php˜  Y1Y˜  ;$≠∂      /   php-code-coverage/Report/Html/Renderer/File.php‚J  Y1Y‚J  ƒHÀÆ∂      F   php-code-coverage/Report/Html/Renderer/Template/coverage_bar.html.dist1  Y1Y1  itLÏ∂      E   php-code-coverage/Report/Html/Renderer/Template/css/bootstrap.min.csspŸ Y1YpŸ X|F∂      A   php-code-coverage/Report/Html/Renderer/Template/css/nv.d3.min.cssX%  Y1YX%  Å0,∂      =   php-code-coverage/Report/Html/Renderer/Template/css/style.css+  Y1Y+  Y`¸g∂      C   php-code-coverage/Report/Html/Renderer/Template/dashboard.html.distœ  Y1Yœ  X°nb∂      C   php-code-coverage/Report/Html/Renderer/Template/directory.html.dist(  Y1Y(  d◊∂      H   php-code-coverage/Report/Html/Renderer/Template/directory_item.html.dist5  Y1Y5  ÒZà]∂      >   php-code-coverage/Report/Html/Renderer/Template/file.html.dist˚  Y1Y˚  á⁄F∂      C   php-code-coverage/Report/Html/Renderer/Template/file_item.html.distg  Y1Yg  V≥P∂      V   php-code-coverage/Report/Html/Renderer/Template/fonts/glyphicons-halflings-regular.eotüN  Y1YüN  X«±ú∂      V   php-code-coverage/Report/Html/Renderer/Template/fonts/glyphicons-halflings-regular.svg¬® Y1Y¬® |Ó∆…∂      V   php-code-coverage/Report/Html/Renderer/Template/fonts/glyphicons-halflings-regular.ttf\±  Y1Y\±  ö<ú∂      W   php-code-coverage/Report/Html/Renderer/Template/fonts/glyphicons-halflings-regular.woffÄ[  Y1YÄ[  Í{ı∂      X   php-code-coverage/Report/Html/Renderer/Template/fonts/glyphicons-halflings-regular.woff2lF  Y1YlF  vË√a∂      C   php-code-coverage/Report/Html/Renderer/Template/js/bootstrap.min.jsµê  Y1Yµê  /£≈j∂      <   php-code-coverage/Report/Html/Renderer/Template/js/d3.min.js≠P Y1Y≠P ≈hÈb∂      :   php-code-coverage/Report/Html/Renderer/Template/js/file.js≠  Y1Y≠  »'π∂      @   php-code-coverage/Report/Html/Renderer/Template/js/holder.min.js†m  Y1Y†m  JÎs—∂      C   php-code-coverage/Report/Html/Renderer/Template/js/html5shiv.min.js[(  Y1Y[(  √º,∂      @   php-code-coverage/Report/Html/Renderer/Template/js/jquery.min.jsµR Y1YµR ~ô‰Ô∂      ?   php-code-coverage/Report/Html/Renderer/Template/js/nv.d3.min.js⁄R Y1Y⁄R <Ms∂      A   php-code-coverage/Report/Html/Renderer/Template/js/respond.min.js  Y1Y  Ì{∂      E   php-code-coverage/Report/Html/Renderer/Template/method_item.html.distx  Y1Yx  *ˆå∂          php-code-coverage/Report/PHP.phpÔ  Y1YÔ  DPÕÎ∂      !   php-code-coverage/Report/Text.php"  Y1Y"  ﬁj⁄∂      1   php-code-coverage/Report/Xml/BuildInformation.phpê
+  Y1Yê
+  {hê∂      )   php-code-coverage/Report/Xml/Coverage.phpE  Y1YE  Œó>õ∂      *   php-code-coverage/Report/Xml/Directory.phpR  Y1YR  &Ï∑a∂      '   php-code-coverage/Report/Xml/Facade.phpG  Y1YG  ÒUoÀ∂      %   php-code-coverage/Report/Xml/File.php÷  Y1Y÷  ûà⁄ø∂      '   php-code-coverage/Report/Xml/Method.phpW  Y1YW  ê	\∂      %   php-code-coverage/Report/Xml/Node.phpÛ  Y1YÛ  ;á#P∂      (   php-code-coverage/Report/Xml/Project.phpX	  Y1YX	  ë7∆∂      '   php-code-coverage/Report/Xml/Report.phpi	  Y1Yi	  ”ÚËE∂      '   php-code-coverage/Report/Xml/Source.php<  Y1Y<  yZF§∂      &   php-code-coverage/Report/Xml/Tests.php  Y1Y  «“Mï∂      '   php-code-coverage/Report/Xml/Totals.phpP  Y1YP  Çûñ∂      %   php-code-coverage/Report/Xml/Unit.php
+  Y1Y
+  -5µ^∂         php-code-coverage/Util.php§  Y1Y§  ê∏3∂         php-code-coverage/Version.php¢  Y1Y¢  Äî|S∂         php-file-iterator/LICENSE  Y1Y  ∂…sâ∂         php-file-iterator/Facade.phpª  Y1Yª  Àœ0é∂         php-file-iterator/Factory.phpÜ	  Y1YÜ	  ©yß≥∂         php-file-iterator/Iterator.phpa  Y1Ya  ◊‰“Â∂         php-text-template/LICENSE  Y1Y  SÒ:¸∂         php-text-template/Template.phpî  Y1Yî  Øw4Ø∂         php-timer/LICENSE  Y1Y  «®AE∂         php-timer/Timer.php	  Y1Y	  ëGT„∂         php-token-stream/LICENSE  Y1Y  É-& ∂         php-token-stream/Token.php’b  Y1Y’b  ¥l<I∂      !   php-token-stream/Token/Stream.phpﬂA  Y1YﬂA  ˘èˇ∂      0   php-token-stream/Token/Stream/CachingFactory.php  Y1Y  _∂         phpunit-mock-objects/LICENSE  Y1Y  ©t0é∂      )   phpunit-mock-objects/Builder/Identity.phpi  Y1Yi  5ˆhú∂      1   phpunit-mock-objects/Builder/InvocationMocker.phpq  Y1Yq  úFñv∂      &   phpunit-mock-objects/Builder/Match.php„  Y1Y„  ‹"◊∂      0   phpunit-mock-objects/Builder/MethodNameMatch.phpO  Y1YO  àW∫	∂      *   phpunit-mock-objects/Builder/Namespace.php‡  Y1Y‡  ﬂ»Rç∂      0   phpunit-mock-objects/Builder/ParametersMatch.php›  Y1Y›  vîﬁ‚∂      %   phpunit-mock-objects/Builder/Stub.php%  Y1Y%  ˝ˇ∂      9   phpunit-mock-objects/Exception/BadMethodCallException.phpï  Y1Yï  “Z:Y∂      ,   phpunit-mock-objects/Exception/Exception.phps  Y1Ys  Û∞•∂      3   phpunit-mock-objects/Exception/RuntimeException.phpâ  Y1Yâ  ÏÛ≤∂      "   phpunit-mock-objects/Generator.php.ô  Y1Y.ô  äÙ∂      3   phpunit-mock-objects/Generator/deprecation.tpl.dist;   Y1Y;   O5¯s∂      4   phpunit-mock-objects/Generator/mocked_class.tpl.dist≥  Y1Y≥  ÈzµQ∂      ;   phpunit-mock-objects/Generator/mocked_class_method.tpl.distÌ   Y1YÌ   ⁄4ﬁ∂      4   phpunit-mock-objects/Generator/mocked_clone.tpl.distÑ   Y1YÑ   úaT∂      5   phpunit-mock-objects/Generator/mocked_method.tpl.dist≈  Y1Y≈  ˆ∆¸Ü∂      :   phpunit-mock-objects/Generator/mocked_method_void.tpl.dist¢  Y1Y¢  ~G'⁄∂      <   phpunit-mock-objects/Generator/mocked_static_method.tpl.distÙ   Y1YÙ   …Nî∂      6   phpunit-mock-objects/Generator/proxied_method.tpl.dist   Y1Y   óÂ…∂      ;   phpunit-mock-objects/Generator/proxied_method_void.tpl.dist˘  Y1Y˘  ∆gEm∂      3   phpunit-mock-objects/Generator/trait_class.tpl.dist7   Y1Y7   ≤[$~∂      6   phpunit-mock-objects/Generator/unmocked_clone.tpl.distü   Y1Yü   8W}ÿ∂      2   phpunit-mock-objects/Generator/wsdl_class.tpl.dist≥   Y1Y≥   w&S∂      3   phpunit-mock-objects/Generator/wsdl_method.tpl.dist<   Y1Y<   æ–iâ∂      #   phpunit-mock-objects/Invocation.phpø  Y1Yø  »ˆê∂      *   phpunit-mock-objects/Invocation/Object.phpÆ  Y1YÆ  ¨e¿H∂      *   phpunit-mock-objects/Invocation/Static.php§  Y1Y§  o–Ïæ∂      )   phpunit-mock-objects/InvocationMocker.phpx  Y1Yx  
+M‘Û∂      "   phpunit-mock-objects/Invokable.phpä  Y1Yä  üà∂          phpunit-mock-objects/Matcher.phpÕ   Y1YÕ   ª~∂      0   phpunit-mock-objects/Matcher/AnyInvokedCount.php±  Y1Y±  	'õ<∂      .   phpunit-mock-objects/Matcher/AnyParameters.php  Y1Y  5ÃÛÌ∂      6   phpunit-mock-objects/Matcher/ConsecutiveParameters.phpº  Y1Yº  Pã6∂      +   phpunit-mock-objects/Matcher/Invocation.php‰  Y1Y‰  ∑KM∂      /   phpunit-mock-objects/Matcher/InvokedAtIndex.phpˆ  Y1Yˆ  r¯-∂      4   phpunit-mock-objects/Matcher/InvokedAtLeastCount.php›  Y1Y›  V≈cΩ∂      3   phpunit-mock-objects/Matcher/InvokedAtLeastOnce.php±  Y1Y±  Cãm∂      3   phpunit-mock-objects/Matcher/InvokedAtMostCount.php“  Y1Y“  æ
+Õ`∂      -   phpunit-mock-objects/Matcher/InvokedCount.php]  Y1Y]  ÓÙO∂      0   phpunit-mock-objects/Matcher/InvokedRecorder.php&  Y1Y&  yxQ∂      +   phpunit-mock-objects/Matcher/MethodName.php  Y1Y  °'Ä∂      +   phpunit-mock-objects/Matcher/Parameters.phpB  Y1YB  ©÷…∂      4   phpunit-mock-objects/Matcher/StatelessInvocation.php-  Y1Y-  êÓÖ∂      $   phpunit-mock-objects/MockBuilder.phpÆ   Y1YÆ   u7>z∂      #   phpunit-mock-objects/MockObject.phpH  Y1YH  \”’t∂         phpunit-mock-objects/Stub.phpΩ  Y1YΩ  ™CÑw∂      .   phpunit-mock-objects/Stub/ConsecutiveCalls.phpd  Y1Yd  ¬~{∂      '   phpunit-mock-objects/Stub/Exception.php˜  Y1Y˜  ø’ˇ∂      /   phpunit-mock-objects/Stub/MatcherCollection.phpø  Y1Yø  @Mû@∂      $   phpunit-mock-objects/Stub/Return.phpu  Y1Yu  4Ün‹∂      ,   phpunit-mock-objects/Stub/ReturnArgument.php–  Y1Y–  Õ≠ÿ∂      ,   phpunit-mock-objects/Stub/ReturnCallback.phpi  Y1Yi  ∂i7s∂      -   phpunit-mock-objects/Stub/ReturnReference.php  Y1Y  Ñ»À‰∂      (   phpunit-mock-objects/Stub/ReturnSelf.php•  Y1Y•  =˘™∂      ,   phpunit-mock-objects/Stub/ReturnValueMap.phpM  Y1YM  ¿“∂      #   phpunit-mock-objects/Verifiable.php†  Y1Y†  œÑ ®∂      *   sebastian-code-unit-reverse-lookup/LICENSE  Y1Y  XXﬁÂ∂      -   sebastian-code-unit-reverse-lookup/Wizard.phpe  Y1Ye  ˛Ìé˛∂         sebastian-comparator/LICENSE	  Y1Y	  V7?.∂      (   sebastian-comparator/ArrayComparator.php`  Y1Y`  ?a€…∂      #   sebastian-comparator/Comparator.phpé  Y1Yé  ~O„7∂      *   sebastian-comparator/ComparisonFailure.php£  Y1Y£  0î∫¥∂      *   sebastian-comparator/DOMNodeComparator.phpW  Y1YW  ÷ä∂˝∂      +   sebastian-comparator/DateTimeComparator.phpV
+  Y1YV
+  ßùÂe∂      )   sebastian-comparator/DoubleComparator.phps  Y1Ys  é†ËÃ∂      ,   sebastian-comparator/ExceptionComparator.php‚  Y1Y‚  ‰◊»∂          sebastian-comparator/Factory.phpZ  Y1YZ  ˇ^“R∂      -   sebastian-comparator/MockObjectComparator.php¿  Y1Y¿  ¸a6~∂      *   sebastian-comparator/NumericComparator.php∫  Y1Y∫  ›´[∂      )   sebastian-comparator/ObjectComparator.php  Y1Y  ⁄ne∂      +   sebastian-comparator/ResourceComparator.php/  Y1Y/  ≈	PM∂      )   sebastian-comparator/ScalarComparator.phpÉ  Y1YÉ  ∂ıÈé∂      3   sebastian-comparator/SplObjectStorageComparator.php€  Y1Y€  ’!•⁄∂      '   sebastian-comparator/TypeComparator.phpÂ  Y1YÂ  Ÿ#˘’∂         sebastian-diff/LICENSE  Y1Y  
+ß~¸∂         sebastian-diff/Chunk.php≈  Y1Y≈  v«|º∂         sebastian-diff/Diff.phpß  Y1Yß  Sdh∂         sebastian-diff/Differ.php)  Y1Y)  SÑ9R∂      /   sebastian-diff/LCS/LongestCommonSubsequence.phpj  Y1Yj  ∑\/∂      L   sebastian-diff/LCS/MemoryEfficientLongestCommonSubsequenceImplementation.phpR	  Y1YR	  úoÉÛ∂      J   sebastian-diff/LCS/TimeEfficientLongestCommonSubsequenceImplementation.php•  Y1Y•  æÚØ∂         sebastian-diff/Line.phpï  Y1Yï  eí‹∂         sebastian-diff/Parser.php∏  Y1Y∏  &««∂         sebastian-environment/LICENSE  Y1Y  r´=∂      !   sebastian-environment/Console.phpO  Y1YO  ¿˙g∂      !   sebastian-environment/Runtime.phpR  Y1YR  òqΩx∂         sebastian-exporter/LICENSE  Y1Y  ÉÅ` ∂         sebastian-exporter/Exporter.php◊#  Y1Y◊#  !ÒYë∂      #   sebastian-recursion-context/LICENSE  Y1Y  €À>∂      '   sebastian-recursion-context/Context.php{  Y1Y{  â§ê∂      )   sebastian-recursion-context/Exception.phpJ  Y1YJ  »Ù≥Ò∂      8   sebastian-recursion-context/InvalidArgumentException.phpí  Y1Yí  mH∂      %   sebastian-resource-operations/LICENSE  Y1Y  I¨ä∂      4   sebastian-resource-operations/ResourceOperations.phpíU  Y1YíU  ÿh’∂         sebastian-global-state/LICENSE  Y1Y  q~Pd∂      $   sebastian-global-state/Blacklist.phpÆ
+  Y1YÆ
+  ‹´9≥∂      '   sebastian-global-state/CodeExporter.phpf	  Y1Yf	  |√!∂      #   sebastian-global-state/Restorer.php"  Y1Y"  MÇÄ∂      #   sebastian-global-state/Snapshot.phpÏ!  Y1YÏ!  √íáπ∂      /   sebastian-global-state/exceptions/Exception.phpP  Y1YP  W∞Z∂      6   sebastian-global-state/exceptions/RuntimeException.phpÇ  Y1YÇ  £yÀ∂         object-enumerator/LICENSE  Y1Y  ºf¨Œ∂      *   sebastian-object-enumerator/Enumerator.phpr  Y1Yr  z«\˝∂      )   sebastian-object-enumerator/Exception.php6  Y1Y6  n$*a∂      8   sebastian-object-enumerator/InvalidArgumentException.phpx  Y1Yx  ù˚'Ì∂         object-reflector/LICENSE
+  Y1Y
+  —F¢˙∂      (   sebastian-object-reflector/Exception.phpN  Y1YN  ≥ ^‚∂      7   sebastian-object-reflector/InvalidArgumentException.phpê  Y1Yê  YƒJ∂      .   sebastian-object-reflector/ObjectReflector.phpà  Y1Yà  ⁄"∂         sebastian-version/LICENSE  Y1Y  n∂         sebastian-version/Version.php±  Y1Y±  N\«∂         doctrine-instantiator/LICENSE$  Y1Y$  
+ÕÇÂ∂      L   doctrine-instantiator/Doctrine/Instantiator/Exception/ExceptionInterface.php•  Y1Y•  Û.√∂      R   doctrine-instantiator/Doctrine/Instantiator/Exception/InvalidArgumentException.phpÙ  Y1YÙ  h≈7I∂      R   doctrine-instantiator/Doctrine/Instantiator/Exception/UnexpectedValueException.phpŒ
+  Y1YŒ
+  "üË ∂      <   doctrine-instantiator/Doctrine/Instantiator/Instantiator.php√   Y1Y√   ¸&‡∂      E   doctrine-instantiator/Doctrine/Instantiator/InstantiatorInterface.php~  Y1Y~  ∂ˇÃ:∂         php-invoker/Invoker.phpÔ  Y1YÔ  w‡∂          php-invoker/TimeoutException.phpp  Y1Yp  ~™¯∂      '   phpdocumentor-reflection-common/LICENSE9  Y1Y9  *2»ê∂      +   phpdocumentor-reflection-common/Element.php1  Y1Y1  ÖiU“∂      (   phpdocumentor-reflection-common/File.php7  Y1Y7  „©3"∂      )   phpdocumentor-reflection-common/Fqsen.phpã  Y1Yã  CÜº∂      ,   phpdocumentor-reflection-common/Location.phpH  Y1YH  ?-ˇ∂      +   phpdocumentor-reflection-common/Project.php  Y1Y  /Hè ∂      2   phpdocumentor-reflection-common/ProjectFactory.php  Y1Y  Q≥"‹∂      )   phpdocumentor-reflection-docblock/LICENSE8  Y1Y8  ·â ∂      .   phpdocumentor-reflection-docblock/DocBlock.phpö  Y1Yö  ä/Âë∂      :   phpdocumentor-reflection-docblock/DocBlock/Description.phpê  Y1Yê  …¡•∂      A   phpdocumentor-reflection-docblock/DocBlock/DescriptionFactory.phpq  Y1Yq  Ü:ºº∂      <   phpdocumentor-reflection-docblock/DocBlock/ExampleFinder.php…  Y1Y…  ü“+∂      9   phpdocumentor-reflection-docblock/DocBlock/Serializer.php7  Y1Y7  Ï@]D∂      A   phpdocumentor-reflection-docblock/DocBlock/StandardTagFactory.phpx-  Y1Yx-  Ú,K∂      2   phpdocumentor-reflection-docblock/DocBlock/Tag.phpu  Y1Yu  ‚π∞∂      9   phpdocumentor-reflection-docblock/DocBlock/TagFactory.php  Y1Y  P;Õ∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Author.php∏	  Y1Y∏	  „àtc∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/BaseTag.phpø  Y1Yø  Xè
+c∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Covers.phpJ  Y1YJ  ˝XL∂      >   phpdocumentor-reflection-docblock/DocBlock/Tags/Deprecated.phpó
+  Y1Yó
+  HO∂∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Example.phpQ  Y1YQ  Ô≠∂      H   phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/StaticMethod.php◊  Y1Y◊  ≥2iº∂      D   phpdocumentor-reflection-docblock/DocBlock/Tags/Factory/Strategy.phpÃ  Y1YÃ  ﬁR∂      =   phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter.php£  Y1Y£  Dy7∂      R   phpdocumentor-reflection-docblock/DocBlock/Tags/Formatter/PassthroughFormatter.php%  Y1Y%  I`˘·∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Generic.phpX
+  Y1YX
+  D‹ ∂      8   phpdocumentor-reflection-docblock/DocBlock/Tags/Link.phpN  Y1YN  Våä∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Method.phpå  Y1Yå  ô¿o∂      9   phpdocumentor-reflection-docblock/DocBlock/Tags/Param.php{  Y1Y{  ‰væO∂      <   phpdocumentor-reflection-docblock/DocBlock/Tags/Property.php”  Y1Y”  TÄœÃ∂      @   phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyRead.php·  Y1Y·  √—ù›∂      A   phpdocumentor-reflection-docblock/DocBlock/Tags/PropertyWrite.php‰  Y1Y‰  ÁòÌ∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Return_.phpÑ  Y1YÑ  ¬ïæR∂      7   phpdocumentor-reflection-docblock/DocBlock/Tags/See.phpd  Y1Yd  ì OÛ∂      9   phpdocumentor-reflection-docblock/DocBlock/Tags/Since.phpˇ	  Y1Yˇ	  Â∏P∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Source.phpm  Y1Ym  àd%∂      :   phpdocumentor-reflection-docblock/DocBlock/Tags/Throws.phpç  Y1Yç  Ë»àÿ∂      8   phpdocumentor-reflection-docblock/DocBlock/Tags/Uses.phpP  Y1YP  T,æ∂      8   phpdocumentor-reflection-docblock/DocBlock/Tags/Var_.php›  Y1Y›  ÔL&∂      ;   phpdocumentor-reflection-docblock/DocBlock/Tags/Version.phpƒ	  Y1Yƒ	  d‹8‚∂      5   phpdocumentor-reflection-docblock/DocBlockFactory.phpì$  Y1Yì$  Jl“2∂      >   phpdocumentor-reflection-docblock/DocBlockFactoryInterface.php!  Y1Y!  ÿ¶}∂      #   phpdocumentor-type-resolver/LICENSE8  Y1Y8  ·â ∂      -   phpdocumentor-type-resolver/FqsenResolver.php¬  Y1Y¬  ]Yñ∂      $   phpdocumentor-type-resolver/Type.php±  Y1Y±  Ø⁄[L∂      ,   phpdocumentor-type-resolver/TypeResolver.phpû"  Y1Yû"  W.∂      ,   phpdocumentor-type-resolver/Types/Array_.phpN  Y1YN  ]…§v∂      -   phpdocumentor-type-resolver/Types/Boolean.phpƒ  Y1Yƒ  Õfˇ∂      /   phpdocumentor-type-resolver/Types/Callable_.phpÀ  Y1YÀ  4…ø∂      .   phpdocumentor-type-resolver/Types/Compound.php  Y1Y  kd4b∂      -   phpdocumentor-type-resolver/Types/Context.php`  Y1Y`  ˇ`´-∂      4   phpdocumentor-type-resolver/Types/ContextFactory.phpÙ  Y1YÙ  áì;∂      ,   phpdocumentor-type-resolver/Types/Float_.phpΩ  Y1YΩ  åw,∂      -   phpdocumentor-type-resolver/Types/Integer.phpé  Y1Yé  "sâ∂      +   phpdocumentor-type-resolver/Types/Mixed.phpœ  Y1Yœ  ∑˙Z∂      +   phpdocumentor-type-resolver/Types/Null_.php»  Y1Y»  @•%≤∂      -   phpdocumentor-type-resolver/Types/Object_.phpk  Y1Yk  ‘©„∂      .   phpdocumentor-type-resolver/Types/Resource.phpŒ  Y1YŒ  ‡‡/∂      ,   phpdocumentor-type-resolver/Types/Scalar.php  Y1Y  UÙìª∂      +   phpdocumentor-type-resolver/Types/Self_.php  Y1Y  ¯Ò9'∂      -   phpdocumentor-type-resolver/Types/Static_.phpU  Y1YU  ¥ﬁü∂      -   phpdocumentor-type-resolver/Types/String_.php…  Y1Y…  ¢ΩÔ∂      *   phpdocumentor-type-resolver/Types/This.php©  Y1Y©  Òh¬≤∂      +   phpdocumentor-type-resolver/Types/Void_.phpW  Y1YW  ÷Èø÷∂         phpspec-prophecy/LICENSE}  Y1Y}  Ú≈6∂      &   phpspec-prophecy/Prophecy/Argument.php«  Y1Y«  AT∂      8   phpspec-prophecy/Prophecy/Argument/ArgumentsWildcard.php4	  Y1Y4	  A;K2∂      :   phpspec-prophecy/Prophecy/Argument/Token/AnyValueToken.php´  Y1Y´  Fèh∂      ;   phpspec-prophecy/Prophecy/Argument/Token/AnyValuesToken.php⁄  Y1Y⁄  ÷bN/∂      B   phpspec-prophecy/Prophecy/Argument/Token/ApproximateValueToken.phpá  Y1Yá  #I˙∂      <   phpspec-prophecy/Prophecy/Argument/Token/ArrayCountToken.php·  Y1Y·  Ç4ÆÃ∂      <   phpspec-prophecy/Prophecy/Argument/Token/ArrayEntryToken.phpî  Y1Yî  ﬁJ˙:∂      A   phpspec-prophecy/Prophecy/Argument/Token/ArrayEveryEntryToken.phpí  Y1Yí  pb¯ç∂      :   phpspec-prophecy/Prophecy/Argument/Token/CallbackToken.php,  Y1Y,  cR Ã∂      <   phpspec-prophecy/Prophecy/Argument/Token/ExactValueToken.php°  Y1Y°   Ö3ê∂      @   phpspec-prophecy/Prophecy/Argument/Token/IdenticalValueToken.phpÊ  Y1YÊ  ùØ ˝∂      <   phpspec-prophecy/Prophecy/Argument/Token/LogicalAndToken.php¯  Y1Y¯   N„v∂      <   phpspec-prophecy/Prophecy/Argument/Token/LogicalNotToken.php  Y1Y  ‹ºr∂      =   phpspec-prophecy/Prophecy/Argument/Token/ObjectStateToken.php9
+  Y1Y9
+  E≤Î.∂      @   phpspec-prophecy/Prophecy/Argument/Token/StringContainsToken.php¸  Y1Y¸  â— >∂      ;   phpspec-prophecy/Prophecy/Argument/Token/TokenInterface.phpê  Y1Yê  Ÿ∞äº∂      6   phpspec-prophecy/Prophecy/Argument/Token/TypeToken.php•  Y1Y•  ÆnÊ\∂      '   phpspec-prophecy/Prophecy/Call/Call.php”	  Y1Y”	  {:Â%∂      -   phpspec-prophecy/Prophecy/Call/CallCenter.php  Y1Y  nJhJ∂      :   phpspec-prophecy/Prophecy/Comparator/ClosureComparator.phpK  Y1YK  )RQ„∂      0   phpspec-prophecy/Prophecy/Comparator/Factory.php‘  Y1Y‘  ÷àiß∂      ;   phpspec-prophecy/Prophecy/Comparator/ProphecyComparator.phps  Y1Ys  ê§h«∂      3   phpspec-prophecy/Prophecy/Doubler/CachedDoubler.phpÉ  Y1YÉ  ÃágË∂      D   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ClassPatchInterface.phpl  Y1Yl  )ä5:∂      H   phpspec-prophecy/Prophecy/Doubler/ClassPatch/DisableConstructorPatch.phpí  Y1Yí  :0`Ú∂      C   phpspec-prophecy/Prophecy/Doubler/ClassPatch/HhvmExceptionPatch.php—  Y1Y—  xì¬^∂      =   phpspec-prophecy/Prophecy/Doubler/ClassPatch/KeywordPatch.phpΩ  Y1YΩ  ˚/@»∂      ?   phpspec-prophecy/Prophecy/Doubler/ClassPatch/MagicCallPatch.phpm	  Y1Ym	  3´.≈∂      E   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ProphecySubjectPatch.phpÚ  Y1YÚ  k2H∞∂      P   phpspec-prophecy/Prophecy/Doubler/ClassPatch/ReflectionClassNewInstancePatch.phpp  Y1Yp  x§øà∂      A   phpspec-prophecy/Prophecy/Doubler/ClassPatch/SplFileInfoPatch.phpQ
+  Y1YQ
+  é≠[û∂      A   phpspec-prophecy/Prophecy/Doubler/ClassPatch/TraversablePatch.php	  Y1Y	  ßÄjN∂      5   phpspec-prophecy/Prophecy/Doubler/DoubleInterface.php‚  Y1Y‚  8dçj∂      -   phpspec-prophecy/Prophecy/Doubler/Doubler.phpè  Y1Yè  8]’^∂      B   phpspec-prophecy/Prophecy/Doubler/Generator/ClassCodeGenerator.php  Y1Y  hLa^∂      <   phpspec-prophecy/Prophecy/Doubler/Generator/ClassCreator.php‘  Y1Y‘  ‰?Br∂      ;   phpspec-prophecy/Prophecy/Doubler/Generator/ClassMirror.php(  Y1Y(  Ê)∂      A   phpspec-prophecy/Prophecy/Doubler/Generator/Node/ArgumentNode.php¿  Y1Y¿  |´∂      >   phpspec-prophecy/Prophecy/Doubler/Generator/Node/ClassNode.phpI  Y1YI  –)U›∂      ?   phpspec-prophecy/Prophecy/Doubler/Generator/Node/MethodNode.php;  Y1Y;  ·+›∂      C   phpspec-prophecy/Prophecy/Doubler/Generator/ReflectionInterface.phpÚ  Y1YÚ  Á˚™Â∂      0   phpspec-prophecy/Prophecy/Doubler/LazyDouble.phpF  Y1YF  ºÎl¶∂      3   phpspec-prophecy/Prophecy/Doubler/NameGenerator.phpä  Y1Yä  ı—7∂      D   phpspec-prophecy/Prophecy/Exception/Call/UnexpectedCallException.php÷  Y1Y÷  £¡Û∏∂      E   phpspec-prophecy/Prophecy/Exception/Doubler/ClassCreatorException.phpµ  Y1Yµ  77/%∂      D   phpspec-prophecy/Prophecy/Exception/Doubler/ClassMirrorException.php™  Y1Y™  €â?∂      F   phpspec-prophecy/Prophecy/Exception/Doubler/ClassNotFoundException.php≈  Y1Y≈  h+Ó§∂      ?   phpspec-prophecy/Prophecy/Exception/Doubler/DoubleException.php©  Y1Y©  zÈFÉ∂      @   phpspec-prophecy/Prophecy/Exception/Doubler/DoublerException.phpó  Y1Yó  √Z^∂      J   phpspec-prophecy/Prophecy/Exception/Doubler/InterfaceNotFoundException.php‡  Y1Y‡  ı°Ö˝∂      L   phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotExtendableException.phpD  Y1YD  ˜pÊ∂      G   phpspec-prophecy/Prophecy/Exception/Doubler/MethodNotFoundException.php÷  Y1Y÷  iﬁhÛ∂      J   phpspec-prophecy/Prophecy/Exception/Doubler/ReturnByReferenceException.phpç  Y1Yç  ˝™∂      1   phpspec-prophecy/Prophecy/Exception/Exception.php+  Y1Y+  ∏µë∂      @   phpspec-prophecy/Prophecy/Exception/InvalidArgumentException.phpï  Y1Yï  ®gÏ∂      E   phpspec-prophecy/Prophecy/Exception/Prediction/AggregateException.phpª  Y1Yª  ?D<Œ∂      L   phpspec-prophecy/Prophecy/Exception/Prediction/FailedPredictionException.phpJ  Y1YJ  ~–„D∂      C   phpspec-prophecy/Prophecy/Exception/Prediction/NoCallsException.php⁄  Y1Y⁄  ¡l<ç∂      F   phpspec-prophecy/Prophecy/Exception/Prediction/PredictionException.phpù  Y1Yù  2T¢—∂      P   phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsCountException.php  Y1Y  Ê	∆∂      K   phpspec-prophecy/Prophecy/Exception/Prediction/UnexpectedCallsException.php,  Y1Y,  èêıa∂      H   phpspec-prophecy/Prophecy/Exception/Prophecy/MethodProphecyException.php)  Y1Y)  F˘¢4∂      H   phpspec-prophecy/Prophecy/Exception/Prophecy/ObjectProphecyException.php  Y1Y  Ü:ÇF∂      B   phpspec-prophecy/Prophecy/Exception/Prophecy/ProphecyException.phpô  Y1Yô  ‹Í$œ∂      I   phpspec-prophecy/Prophecy/PhpDocumentor/ClassAndInterfaceTagRetriever.phpx  Y1Yx  r–¨∂      =   phpspec-prophecy/Prophecy/PhpDocumentor/ClassTagRetriever.phpD  Y1YD  d9¡œ∂      C   phpspec-prophecy/Prophecy/PhpDocumentor/LegacyClassTagRetriever.phpo  Y1Yo  u9á∂      G   phpspec-prophecy/Prophecy/PhpDocumentor/MethodTagRetrieverInterface.phpﬂ  Y1Yﬂ  ò;â∂      7   phpspec-prophecy/Prophecy/Prediction/CallPrediction.phpQ	  Y1YQ	  IÊìÈ∂      <   phpspec-prophecy/Prophecy/Prediction/CallTimesPrediction.phpì  Y1Yì  Xä¸∂      ;   phpspec-prophecy/Prophecy/Prediction/CallbackPrediction.phpì  Y1Yì  Vb{Œ∂      :   phpspec-prophecy/Prophecy/Prediction/NoCallsPrediction.phpÂ  Y1YÂ  L9%∂      <   phpspec-prophecy/Prophecy/Prediction/PredictionInterface.phpü  Y1Yü  `IE∂      5   phpspec-prophecy/Prophecy/Promise/CallbackPromise.phpç  Y1Yç  [û‹∂      6   phpspec-prophecy/Prophecy/Promise/PromiseInterface.phpK  Y1YK  æ¨ÖÎ∂      ;   phpspec-prophecy/Prophecy/Promise/ReturnArgumentPromise.php'  Y1Y'  ‚(´≥∂      3   phpspec-prophecy/Prophecy/Promise/ReturnPromise.php  Y1Y  Áÿè‰∂      2   phpspec-prophecy/Prophecy/Promise/ThrowPromise.php]  Y1Y]  £Œ	~∂      5   phpspec-prophecy/Prophecy/Prophecy/MethodProphecy.phpZ/  Y1YZ/  Ùl_r∂      5   phpspec-prophecy/Prophecy/Prophecy/ObjectProphecy.phpá  Y1Yá  ﬂ5D∂      8   phpspec-prophecy/Prophecy/Prophecy/ProphecyInterface.php,  Y1Y,  °W∂      ?   phpspec-prophecy/Prophecy/Prophecy/ProphecySubjectInterface.phpﬂ  Y1Yﬂ  i≤∂      /   phpspec-prophecy/Prophecy/Prophecy/Revealer.phpê  Y1Yê  j……∏∂      8   phpspec-prophecy/Prophecy/Prophecy/RevealerInterface.phpH  Y1YH  ágZ∂∂      %   phpspec-prophecy/Prophecy/Prophet.php  Y1Y  Ávqé∂      -   phpspec-prophecy/Prophecy/Util/ExportUtil.phpP  Y1YP  2ºq∆∂      -   phpspec-prophecy/Prophecy/Util/StringUtil.phpÏ	  Y1YÏ	  %¯∂         myclabs-deep-copy/LICENSE5  Y1Y5   ≠ÀÑ∂      '   myclabs-deep-copy/DeepCopy/DeepCopy.php  Y1Y  \Uà≤∂      7   myclabs-deep-copy/DeepCopy/Exception/CloneException.php`   Y1Y`   .⁄ù¸∂      G   myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineCollectionFilter.php÷  Y1Y÷  ∆xk–∂      L   myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineEmptyCollectionFilter.phpe  Y1Ye  +®÷∂      B   myclabs-deep-copy/DeepCopy/Filter/Doctrine/DoctrineProxyFilter.phpy  Y1Yy  ∆˛-∂      ,   myclabs-deep-copy/DeepCopy/Filter/Filter.phpS  Y1YS  ks¿k∂      0   myclabs-deep-copy/DeepCopy/Filter/KeepFilter.php˘   Y1Y˘   ´ﬂù´∂      3   myclabs-deep-copy/DeepCopy/Filter/ReplaceFilter.php  Y1Y  Ãé|ˆ∂      3   myclabs-deep-copy/DeepCopy/Filter/SetNullFilter.php≤  Y1Y≤  ØM‰ß∂      D   myclabs-deep-copy/DeepCopy/Matcher/Doctrine/DoctrineProxyMatcher.phpX  Y1YX  bO∂      .   myclabs-deep-copy/DeepCopy/Matcher/Matcher.phpÎ   Y1YÎ   (ú(Ì∂      6   myclabs-deep-copy/DeepCopy/Matcher/PropertyMatcher.phpù  Y1Yù  u÷÷Ö∂      :   myclabs-deep-copy/DeepCopy/Matcher/PropertyNameMatcher.php‡  Y1Y‡  y„ªû∂      :   myclabs-deep-copy/DeepCopy/Matcher/PropertyTypeMatcher.phpz  Y1Yz  =˝#ﬁ∂      :   myclabs-deep-copy/DeepCopy/Reflection/ReflectionHelper.php9  Y1Y9  jñ«Z∂      7   myclabs-deep-copy/DeepCopy/TypeFilter/ReplaceFilter.php˙  Y1Y˙  µ;If∂      ;   myclabs-deep-copy/DeepCopy/TypeFilter/ShallowCopyFilter.phpÕ   Y1YÕ   ÿ™˛Ü∂      A   myclabs-deep-copy/DeepCopy/TypeFilter/Spl/SplDoublyLinkedList.php   Y1Y   §)∂      4   myclabs-deep-copy/DeepCopy/TypeFilter/TypeFilter.phpπ   Y1Yπ   9ò4·∂      6   myclabs-deep-copy/DeepCopy/TypeMatcher/TypeMatcher.php‰  Y1Y‰   ®ö˘∂         webmozart-assert/LICENSE<  Y1Y<  tÿ}ı∂         webmozart-assert/Assert.phpí~  Y1Yí~  Oõã,∂         phar-io-manifest/LICENSEQ  Y1YQ  $W0Ê∂      +   phar-io-manifest/ManifestDocumentMapper.phpï  Y1Yï  π@Ó∂      #   phar-io-manifest/ManifestLoader.phpà  Y1Yà  B8ÿ	∂      '   phar-io-manifest/ManifestSerializer.php  Y1Y  »t<D∂      )   phar-io-manifest/exceptions/Exception.phpn  Y1Yn  ÈÁY˝∂      ?   phar-io-manifest/exceptions/InvalidApplicationNameException.phpÒ  Y1YÒ  6KQ∂      5   phar-io-manifest/exceptions/InvalidEmailException.php≠  Y1Y≠  ï3D∂      3   phar-io-manifest/exceptions/InvalidUrlException.php´  Y1Y´  )á ≠∂      9   phar-io-manifest/exceptions/ManifestDocumentException.phpv   Y1Yv   Ú∫∂      ?   phar-io-manifest/exceptions/ManifestDocumentMapperException.php|   Y1Y|   €A	ê∂      8   phar-io-manifest/exceptions/ManifestElementException.phpu   Y1Yu   Ñ÷w/∂      7   phar-io-manifest/exceptions/ManifestLoaderException.phpm   Y1Ym   8L:ˆ∂      '   phar-io-manifest/values/Application.phpﬁ  Y1Yﬁ  7$~◊∂      +   phar-io-manifest/values/ApplicationName.phpc  Y1Yc  üç∂      "   phar-io-manifest/values/Author.php%  Y1Y%  ÙÛW8∂      ,   phar-io-manifest/values/AuthorCollection.php¶  Y1Y¶  GrÜ∂      4   phar-io-manifest/values/AuthorCollectionIterator.phpa  Y1Ya  £∏ã°∂      ,   phar-io-manifest/values/BundledComponent.php®  Y1Y®  ¨-ò≈∂      6   phar-io-manifest/values/BundledComponentCollection.php(  Y1Y(  Ä
+±⁄∂      >   phar-io-manifest/values/BundledComponentCollectionIterator.phpœ  Y1Yœ  }ˇÛ¥∂      0   phar-io-manifest/values/CopyrightInformation.phpx  Y1Yx  tß»b∂      !   phar-io-manifest/values/Email.php‰  Y1Y‰  cƒ M∂      %   phar-io-manifest/values/Extension.php˘  Y1Y˘  …0Ï∂      #   phar-io-manifest/values/Library.php÷  Y1Y÷  FÇz∂      #   phar-io-manifest/values/License.php  Y1Y  *∫◊∂      $   phar-io-manifest/values/Manifest.php¡  Y1Y¡  ≥ºD∫∂      3   phar-io-manifest/values/PhpExtensionRequirement.php«  Y1Y«  <”ÚÕ∂      1   phar-io-manifest/values/PhpVersionRequirement.php  Y1Y  ÈÑ,ˆ∂      '   phar-io-manifest/values/Requirement.phpp  Y1Yp  6V˙A∂      1   phar-io-manifest/values/RequirementCollection.phpÁ  Y1YÁ  )ıÜ∂      9   phar-io-manifest/values/RequirementCollectionIterator.phpò  Y1Yò  n§®∂          phar-io-manifest/values/Type.phpÛ  Y1YÛ  ∆pnÑ∂         phar-io-manifest/values/Url.php»  Y1Y»  f·]ï∂      &   phar-io-manifest/xml/AuthorElement.php7  Y1Y7  ÷ü∂      0   phar-io-manifest/xml/AuthorElementCollection.php  Y1Y  B«yŒ∂      '   phar-io-manifest/xml/BundlesElement.php&  Y1Y&  OœØÚ∂      )   phar-io-manifest/xml/ComponentElement.php>  Y1Y>  ∆+»∂      3   phar-io-manifest/xml/ComponentElementCollection.php  Y1Y  #√IŒ∂      (   phar-io-manifest/xml/ContainsElement.php'  Y1Y'  ûü◊Z∂      )   phar-io-manifest/xml/CopyrightElement.php´  Y1Y´  •ãñ∂      *   phar-io-manifest/xml/ElementCollection.phpŒ  Y1YŒ  ﬁ'ë*∂      #   phar-io-manifest/xml/ExtElement.php⁄  Y1Y⁄  h/j3∂      -   phar-io-manifest/xml/ExtElementCollection.php  Y1Y  ±πó∂      )   phar-io-manifest/xml/ExtensionElement.phpB  Y1YB  ∏åë∂      '   phar-io-manifest/xml/LicenseElement.php4  Y1Y4  ∂Ë∂      )   phar-io-manifest/xml/ManifestDocument.php≥  Y1Y≥  üπÚ1∂      9   phar-io-manifest/xml/ManifestDocumentLoadingException.php≤  Y1Y≤  ΩÚ∆>∂      (   phar-io-manifest/xml/ManifestElement.phpÖ	  Y1YÖ	  :6†X∂      #   phar-io-manifest/xml/PhpElement.php√  Y1Y√  p{:∂      (   phar-io-manifest/xml/RequiresElement.php  Y1Y  (ÌÕ∑∂         phar-io-version/LICENSE1  Y1Y1  >≤ª:∂      -   phar-io-version/AbstractVersionConstraint.phpÒ  Y1YÒ  Whgà∂      -   phar-io-version/AndVersionConstraintGroup.php7  Y1Y7  Øpüë∂      (   phar-io-version/AnyVersionConstraint.phpà  Y1Yà  ¨µ∂      *   phar-io-version/ExactVersionConstraint.phpZ  Y1YZ  ⁄ˆ∂         phar-io-version/Exception.phpl  Y1Yl  ∂ÿàÒ∂      9   phar-io-version/GreaterThanOrEqualToVersionConstraint.php	  Y1Y	  ΩRf∂      +   phar-io-version/InvalidVersionException.phpz   Y1Yz   œ°>C∂      ,   phar-io-version/OrVersionConstraintGroup.php5  Y1Y5  ‹…ëä∂      $   phar-io-version/PreReleaseSuffix.php^  Y1Y^  !·2ç∂      :   phar-io-version/SpecificMajorAndMinorVersionConstraint.phpa  Y1Ya  ˜ì∂      2   phar-io-version/SpecificMajorVersionConstraint.phpx  Y1Yx  ¸£Ÿ6∂      9   phar-io-version/UnsupportedVersionConstraintException.phpπ  Y1Yπ  Î`rÁ∂         phar-io-version/Version.php˚  Y1Y˚  ÔÂ∂      %   phar-io-version/VersionConstraint.php6  Y1Y6  w˙U±∂      +   phar-io-version/VersionConstraintParser.phpY  Y1YY  ÇÜ+l∂      *   phar-io-version/VersionConstraintValue.php
+  Y1Y
+  -∞˛t∂      !   phar-io-version/VersionNumber.php"  Y1Y"  ≥víﬁ∂         theseer-tokenizer/LICENSE¸  Y1Y¸  ÔR(∂         theseer-tokenizer/Exception.phpg   Y1Yg   ’¨◊X∂      "   theseer-tokenizer/NamespaceUri.phpw  Y1Yw  'U≠∂      +   theseer-tokenizer/NamespaceUriException.phpr   Y1Yr   +ìA∂         theseer-tokenizer/Token.phpq  Y1Yq  ´≠?î∂      %   theseer-tokenizer/TokenCollection.phpr
+  Y1Yr
+  ≥g9∂      .   theseer-tokenizer/TokenCollectionException.phpu   Y1Yu   Ü‘BK∂         theseer-tokenizer/Tokenizer.phpÌ  Y1YÌ  û°≠∂      #   theseer-tokenizer/XMLSerializer.phpÉ	  Y1YÉ	  E!{A∂         phpunit/Exception.phpE  Y1YE  ?:q_∂         phpunit/Framework/Assert.phpﬂO Y1YﬂO !˘öÏ∂      &   phpunit/Framework/Assert/Functions.php$Ø  Y1Y$Ø  %BÚ∂      *   phpunit/Framework/AssertionFailedError.php2  Y1Y2  øË∂      &   phpunit/Framework/BaseTestListener.phpƒ  Y1Yƒ  Û¢Æg∂      +   phpunit/Framework/CodeCoverageException.php5  Y1Y5  ´|cé∂      ,   phpunit/Framework/Constraint/ArrayHasKey.phpî  Y1Yî   °âü∂      ,   phpunit/Framework/Constraint/ArraySubset.php›
+  Y1Y›
+  ÷‰´∂∂      *   phpunit/Framework/Constraint/Attribute.phpF	  Y1YF	  Y{
+∂∂      )   phpunit/Framework/Constraint/Callback.phpK  Y1YK  t¥4ú∂      2   phpunit/Framework/Constraint/ClassHasAttribute.php¶  Y1Y¶  “Ëû˘∂      8   phpunit/Framework/Constraint/ClassHasStaticAttribute.php	  Y1Y	  pÉÌâ∂      *   phpunit/Framework/Constraint/Composite.phpa  Y1Ya  7â∂¬∂      +   phpunit/Framework/Constraint/Constraint.phpΩ  Y1YΩ  ∫‚¨∂      &   phpunit/Framework/Constraint/Count.phpã  Y1Yã  æö›r∂      0   phpunit/Framework/Constraint/DirectoryExists.phpå  Y1Yå  FW9p∂      *   phpunit/Framework/Constraint/Exception.phpZ  Y1YZ  Ç'ï∂      .   phpunit/Framework/Constraint/ExceptionCode.php!  Y1Y!  R4#∑∂      1   phpunit/Framework/Constraint/ExceptionMessage.php
+  Y1Y
+  }2N£∂      B   phpunit/Framework/Constraint/ExceptionMessageRegularExpression.phpÉ  Y1YÉ  ˚[A^∂      +   phpunit/Framework/Constraint/FileExists.php}  Y1Y}  Îó,’∂      ,   phpunit/Framework/Constraint/GreaterThan.phpù  Y1Yù  ©ºH∂      +   phpunit/Framework/Constraint/IsAnything.php  Y1Y  JÆHÃ∂      (   phpunit/Framework/Constraint/IsEmpty.php  Y1Y  JéÉr∂      (   phpunit/Framework/Constraint/IsEqual.phpÆ  Y1YÆ  $≠≥∂      (   phpunit/Framework/Constraint/IsFalse.php=  Y1Y=  JˆP˙∂      )   phpunit/Framework/Constraint/IsFinite.phpB  Y1YB  ˝ÒEÓ∂      ,   phpunit/Framework/Constraint/IsIdentical.php‹  Y1Y‹  ÉMT∂      +   phpunit/Framework/Constraint/IsInfinite.phpJ  Y1YJ  ¢péD∂      -   phpunit/Framework/Constraint/IsInstanceOf.php∑  Y1Y∑  á≠k>∂      '   phpunit/Framework/Constraint/IsJson.php„  Y1Y„  S¸	∂      &   phpunit/Framework/Constraint/IsNan.php6  Y1Y6  íØ î∂      '   phpunit/Framework/Constraint/IsNull.php9  Y1Y9  	ù∆S∂      +   phpunit/Framework/Constraint/IsReadable.phpÜ  Y1YÜ  ÌAY∂      '   phpunit/Framework/Constraint/IsTrue.php9  Y1Y9  Q[∫^∂      '   phpunit/Framework/Constraint/IsType.phpD  Y1YD  —ΩªM∂      +   phpunit/Framework/Constraint/IsWritable.phpÜ  Y1YÜ  +≥d∂      ,   phpunit/Framework/Constraint/JsonMatches.phpƒ  Y1Yƒ  I«)∑∂      @   phpunit/Framework/Constraint/JsonMatchesErrorMessageProvider.phpä  Y1Yä  %À©`∂      )   phpunit/Framework/Constraint/LessThan.phpî  Y1Yî  #∞oÛ∂      +   phpunit/Framework/Constraint/LogicalAnd.phpï  Y1Yï  ÅÓøj∂      +   phpunit/Framework/Constraint/LogicalNot.php”  Y1Y”  ¶øb∂      *   phpunit/Framework/Constraint/LogicalOr.phpø
+  Y1Yø
+  eR8V∂      +   phpunit/Framework/Constraint/LogicalXor.php2  Y1Y2  »/»∂      3   phpunit/Framework/Constraint/ObjectHasAttribute.phpq  Y1Yq  sk=+∂      2   phpunit/Framework/Constraint/RegularExpression.phpè  Y1Yè  —ÿ«∂      )   phpunit/Framework/Constraint/SameSize.php&  Y1Y&  ëõÁf∂      /   phpunit/Framework/Constraint/StringContains.phpˆ  Y1Yˆ  ØöÛ˚∂      /   phpunit/Framework/Constraint/StringEndsWith.php°  Y1Y°  {;âQ∂      ?   phpunit/Framework/Constraint/StringMatchesFormatDescription.phpN	  Y1YN	  ëô|∂      1   phpunit/Framework/Constraint/StringStartsWith.phpè  Y1Yè  ¶˜F{∂      4   phpunit/Framework/Constraint/TraversableContains.phpò  Y1Yò  x’{ ∂      8   phpunit/Framework/Constraint/TraversableContainsOnly.phpJ	  Y1YJ	  hf/ü∂      5   phpunit/Framework/CoveredCodeNotExecutedException.php€  Y1Y€  }	PΩ∂      +   phpunit/Framework/DataProviderTestSuite.phpE  Y1YE  ˝;p∂      &   phpunit/Framework/Error/Deprecated.php  Y1Y  ëc–Ä∂      !   phpunit/Framework/Error/Error.php  Y1Y  §Yh∂      "   phpunit/Framework/Error/Notice.php¯  Y1Y¯  è≥#†∂      #   phpunit/Framework/Error/Warning.php˚  Y1Y˚  í«ë∂         phpunit/Framework/Exception.php˚  Y1Y˚  ∏¯#K∂      &   phpunit/Framework/ExceptionWrapper.phpG  Y1YG  0‰*∫∂      0   phpunit/Framework/ExpectationFailedException.phpº  Y1Yº  √ﬁ9b∂      $   phpunit/Framework/IncompleteTest.php∂  Y1Y∂  ,’ª›∂      (   phpunit/Framework/IncompleteTestCase.phpÎ  Y1YÎ  P7∂      )   phpunit/Framework/IncompleteTestError.php…  Y1Y…  ‰€Æ≠∂      2   phpunit/Framework/InvalidCoversTargetException.phpG  Y1YG  ÆiZô∂      6   phpunit/Framework/MissingCoversAnnotationException.phpÁ  Y1YÁ  .@ªk∂      !   phpunit/Framework/OutputError.phpØ  Y1YØ  H28â∂         phpunit/Framework/RiskyTest.phpÄ  Y1YÄ  ;˘|∂      $   phpunit/Framework/RiskyTestError.phpπ  Y1Yπ  ó∆>∂      $   phpunit/Framework/SelfDescribing.phpÌ  Y1YÌ  ë€∂      !   phpunit/Framework/SkippedTest.phpe  Y1Ye  VÈlÂ∂      %   phpunit/Framework/SkippedTestCase.php†  Y1Y†  ·õ4∂      &   phpunit/Framework/SkippedTestError.php¿  Y1Y¿  ©MI˝∂      +   phpunit/Framework/SkippedTestSuiteError.phpÀ  Y1YÀ  o0Ÿ∂      $   phpunit/Framework/SyntheticError.php“  Y1Y“  Ú/8Á∂         phpunit/Framework/Test.php@  Y1Y@  ~“DG∂         phpunit/Framework/TestCase.php‘ Y1Y‘ È‚Z»∂      !   phpunit/Framework/TestFailure.phpQ  Y1YQ  «¨ß°∂      "   phpunit/Framework/TestListener.phpH  Y1YH  5¢e8∂          phpunit/Framework/TestResult.php{  Y1Y{  rRê◊∂         phpunit/Framework/TestSuite.php™l  Y1Y™l  õ∆œ∂      '   phpunit/Framework/TestSuiteIterator.phpå  Y1Yå  t¨_©∂      5   phpunit/Framework/UnintentionallyCoveredCodeError.php   Y1Y    «7ˇ∂         phpunit/Framework/Warning.php&  Y1Y&  CgaÎ∂      %   phpunit/Framework/WarningTestCase.php  Y1Y  Àÿ£∂      !   phpunit/Runner/BaseTestRunner.phpu  Y1Yu  ∆~gï∂         phpunit/Runner/Exception.phpK  Y1YK  @›5v∂      4   phpunit/Runner/Filter/ExcludeGroupFilterIterator.phpı  Y1Yı  ÊIQ∞∂      !   phpunit/Runner/Filter/Factory.php  Y1Y  ®ÒNj∂      -   phpunit/Runner/Filter/GroupFilterIterator.phpÈ  Y1YÈ  aÁ¥∂      4   phpunit/Runner/Filter/IncludeGroupFilterIterator.phpÙ  Y1YÙ  Öœã∂      ,   phpunit/Runner/Filter/NameFilterIterator.php  Y1Y  Î&üs∂         phpunit/Runner/PhptTestCase.php’,  Y1Y’,  ´>=π∂      *   phpunit/Runner/StandardTestSuiteLoader.phpá  Y1Yá  yxX∂      "   phpunit/Runner/TestSuiteLoader.phpÃ  Y1YÃ  ¶Ë:»∂         phpunit/Runner/Version.phpP  Y1YP  ìBj6∂         phpunit/TextUI/Command.php¶î  Y1Y¶î  â˝`}∂          phpunit/TextUI/ResultPrinter.php¯C  Y1Y¯C  Û 4)∂         phpunit/TextUI/TestRunner.phpe™  Y1Ye™  °ÏY∂         phpunit/Util/Blacklist.phpô  Y1Yô  p[g∆∂         phpunit/Util/Configuration.php~å  Y1Y~å  û„Ro∂      '   phpunit/Util/ConfigurationGenerator.php"  Y1Y"  n(æ5∂         phpunit/Util/ErrorHandler.phpi  Y1Yi  y∞K◊∂         phpunit/Util/Fileloader.phpT  Y1YT  ŒÊËí∂         phpunit/Util/Filesystem.php-  Y1Y-  ¸Ω=Û∂         phpunit/Util/Filter.phpn  Y1Yn  ôÊ)∂         phpunit/Util/Getopt.php¯  Y1Y¯  ˚D≥é∂         phpunit/Util/GlobalState.phpè  Y1Yè  Qå≤´∂      &   phpunit/Util/InvalidArgumentHelper.php.  Y1Y.  €ü¨∂         phpunit/Util/Log/JUnit.phpÇ.  Y1YÇ.  µ]aÊ∂         phpunit/Util/Log/TeamCity.php¸*  Y1Y¸*  [C∏¿∂      '   phpunit/Util/PHP/AbstractPhpProcess.phph)  Y1Yh)  ∏Ó%Ó∂      &   phpunit/Util/PHP/DefaultPhpProcess.phpK  Y1YK  [{?l∂      0   phpunit/Util/PHP/Template/TestCaseClass.tpl.distÛ  Y1YÛ  4}∂      1   phpunit/Util/PHP/Template/TestCaseMethod.tpl.dist˝  Y1Y˝  373∂      &   phpunit/Util/PHP/WindowsPhpProcess.php  Y1Y  ¬≤∂         phpunit/Util/PHP/eval-stdin.php  Y1Y  ´^Èﬂ∂         phpunit/Util/Printer.phpA  Y1YA  _±Y2∂      "   phpunit/Util/RegularExpression.phpx  Y1Yx  03-∂         phpunit/Util/Test.php8î  Y1Y8î  ñø∆∂      *   phpunit/Util/TestDox/HtmlResultPrinter.phpØ
+  Y1YØ
+  MŸ#i∂      '   phpunit/Util/TestDox/NamePrettifier.phpF  Y1YF  ıã≈ ∂      &   phpunit/Util/TestDox/ResultPrinter.phpT#  Y1YT#  ÎZ/L∂      *   phpunit/Util/TestDox/TextResultPrinter.php;  Y1Y;  ‘K9∂      )   phpunit/Util/TestDox/XmlResultPrinter.phpc  Y1Yc  S∑∆∂         phpunit/Util/Type.phpU  Y1YU  ÷>À;∂         phpunit/Util/Xml.php⁄!  Y1Y⁄!  +^TÛ∂      phpunit/phpunit: 6.2.1
+doctrine/instantiator: 1.0.5
+myclabs/deep-copy: 1.6.1
+phar-io/manifest: 1.0.1
+phar-io/version: 1.0.1
+phpdocumentor/reflection-common: 1.0
+phpdocumentor/reflection-docblock: 3.1.1
+phpdocumentor/type-resolver: 0.2.1
+phpspec/prophecy: v1.7.0
+phpunit/php-code-coverage: 5.2.1
+phpunit/php-file-iterator: 1.4.2
+phpunit/php-invoker: 1.1.4
+phpunit/php-text-template: 1.2.1
+phpunit/php-timer: 1.0.9
+phpunit/php-token-stream: 1.4.11
+phpunit/phpunit-mock-objects: 4.0.1
+sebastian/code-unit-reverse-lookup: 1.0.1
+sebastian/comparator: 2.0.0
+sebastian/diff: 1.4.3
+sebastian/environment: 3.0.3
+sebastian/exporter: 3.1.0
+sebastian/global-state: 2.0.0
+sebastian/object-enumerator: 3.0.2
+sebastian/object-reflector: 1.1.1
+sebastian/recursion-context: 3.0.0
+sebastian/resource-operations: 1.0.0
+sebastian/version: 2.0.1
+theseer/tokenizer: 1.1.0
+webmozart/assert: 1.2.0
+-----BEGIN CERTIFICATE-----
+MIIENjCCAx6gAwIBAgIBATANBgkqhkiG9w0BAQUFADBvMQswCQYDVQQGEwJTRTEU
+MBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsTHUFkZFRydXN0IEV4dGVybmFs
+IFRUUCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290
+MB4XDTAwMDUzMDEwNDgzOFoXDTIwMDUzMDEwNDgzOFowbzELMAkGA1UEBhMCU0Ux
+FDASBgNVBAoTC0FkZFRydXN0IEFCMSYwJAYDVQQLEx1BZGRUcnVzdCBFeHRlcm5h
+bCBUVFAgTmV0d29yazEiMCAGA1UEAxMZQWRkVHJ1c3QgRXh0ZXJuYWwgQ0EgUm9v
+dDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALf3GjPm8gAELTngTlvt
+H7xsD821+iO2zt6bETOXpClMfZOfvUq8k+0DGuOPz+VtUFrWlymUWoCwSXrbLpX9
+uMq/NzgtHj6RQa1wVsfwTz/oMp50ysiQVOnGXw94nZpAPA6sYapeFI+eh6FqUNzX
+mk6vBbOmcZSccbNQYArHE504B4YCqOmoaSYYkKtMsE8jqzpPhNjfzp/haW+710LX
+a0Tkx63ubUFfclpxCDezeWWkWaCUN/cALw3CknLa0Dhy2xSoRcRdKn23tNbE7qzN
+E0S3ySvdQwAl+mG5aWpYIxG3pzOPVnVZ9c0p10a3CitlttNCbxWyuHv77+ldU9U0
+WicCAwEAAaOB3DCB2TAdBgNVHQ4EFgQUrb2YejS0Jvf6xCZU7wO94CTLVBowCwYD
+VR0PBAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wgZkGA1UdIwSBkTCBjoAUrb2YejS0
+Jvf6xCZU7wO94CTLVBqhc6RxMG8xCzAJBgNVBAYTAlNFMRQwEgYDVQQKEwtBZGRU
+cnVzdCBBQjEmMCQGA1UECxMdQWRkVHJ1c3QgRXh0ZXJuYWwgVFRQIE5ldHdvcmsx
+IjAgBgNVBAMTGUFkZFRydXN0IEV4dGVybmFsIENBIFJvb3SCAQEwDQYJKoZIhvcN
+AQEFBQADggEBALCb4IUlwtYj4g+WBpKdQZic2YR5gdkeWxQHIzZlj7DYd7usQWxH
+YINRsPkyPef89iYTx4AWpb9a/IfPeHmJIZriTAcKhjW88t5RxNKWt9x+Tu5w/Rw5
+6wwCURQtjr0W4MHfRnXnJK3s9EK0hZNwEGe6nQY1ShjTK3rMUUKhemPR5ruhxSvC
+Nr4TDea9Y355e6cJDUCrat2PisP29owaQgVR1EX1n6diIWgVIEM8med8vSTYqZEX
+c4g/VhsxOBi0cQ+azcgOno4uG+GMmIPLHzHxREzGBHNJdmAPx/i9F4BrLunMTA5a
+mnkPIAou1Z5jJh5VkpTYghdae9C8x49OhgQ=
+-----END CERTIFICATE-----
+PHP_CodeCoverage
+
+Copyright (c) 2009-2015, Sebastian Bergmann <sebastian@phpunit.de>.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+ * Neither the name of Sebastian Bergmann nor the names of his
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+<?php
+/*
+ * This file is part of the php-code-coverage package.
+ *
+ * (c) Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace SebastianBergmann\CodeCoverage;
+
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Runner\PhptTestCase;
+use SebastianBergmann\CodeCoverage\Driver\Driver;
+use SebastianBergmann\CodeCoverage\Driver\Xdebug;
+use SebastianBergmann\CodeCoverage\Driver\HHVM;
+use SebastianBergmann\CodeCoverage\Driver\PHPDBG;
+use SebastianBergmann\CodeCoverage\Node\Builder;
+use SebastianBergmann\CodeCoverage\Node\Directory;
+use SebastianBergmann\CodeUnitReverseLookup\Wizard;
+use SebastianBergmann\Environment\Runtime;
+
+/**
+ * Provides collection functionality for PHP code coverage information.
+ */
+class CodeCoverage
+{
+    /**
+     * @var Driver
+     */
+    private $driver;
+
+    /**
+     * @var Filter
+     */
+    private $filter;
+
+    /**
+     * @var Wizard
+     */
+    private $wizard;
+
+    /**
+     * @var bool
+     */
+    private $cacheTokens = false;
+
+    /**
+     * @var bool
+     */
+    private $checkForUnintentionallyCoveredCode = false;
+
+    /**
+     * @var bool
+     */
+    private $forceCoversAnnotation = false;
+
+    /**
+     * @var bool
+     */
+    private $checkForUnexecutedCoveredCode = false;
+
+    /**
+     * @var bool
+     */
+    private $checkForMissingCoversAnnotation = false;
+
+    /**
+     * @var bool
+     */
+    private $addUncoveredFilesFromWhitelist = true;
+
+    /**
+     * @var bool
+     */
+    private $processUncoveredFilesFromWhitelist = false;
+
+    /**
+     * @var bool
+     */
+    private $ignoreDeprecatedCode = false;
+
+    /**
+     * @var mixed
+     */
+    private $currentId;
+
+    /**
+     * Code coverage data.
+     *
+     * @var array
+     */
+    private $data = [];
+
+    /**
+     * @var array
+     */
+    private $ignoredLines = [];
+
+    /**
+     * @var bool
+     */
+    private $disableIgnoredLines = false;
+
+    /**
+     * Test data.
+     *
+     * @var array
+     */
+    private $tests = [];
+
+    /**
+     * @var string[]
+     */
+    private $unintentionallyCoveredSubclassesWhitelist = [];
+
+    /**
+     * Determine if the data has been initialized or not
+     *
+     * @var bool
+     */
+    private $isInitialized = false;
+
+    /**
+     * Determine whether we need to check for dead and unused code on each test
+     *
+     * @var bool
+     */
+    private $shouldCheckForDeadAndUnused = true;
+
+    /**
+     * @var Directory
+     */
+    private $report;
+
+    /**
+     * Constructor.
+     *
+     * @param Driver $driver
+     * @param Filter $filter
+     *
+     * @throws RuntimeException
+     */
+    public function __construct(Driver $driver = null, Filter $filter = null)
+    {
+        if ($driver === null) {
+            $driver = $this->selectDriver();
+        }
+
+        if ($filter === null) {
+            $filter = new Filter;
+        }
+
+        $this->driver = $driver;
+        $this->filter = $filter;
+
+        $this->wizard = new Wizard;
+    }
+
+    /**
+     * Returns the code coverage information as a graph of node objects.
+     *
+     * @return Directory
+     */
+    public function getReport()
+    {
+        if ($this->report === null) {
+            $builder = new Builder;
+
+            $this->report = $builder->build($this);
+        }
+
+        return $this->report;
+    }
+
+    /**
+     * Clears collected code coverage data.
+     */
+    public function clear()
+    {
+        $this->isInitialized = false;
+        $this->currentId     = null;
+        $this->data          = [];
+        $this->tests         = [];
+        $this->report        = null;
+    }
+
+    /**
+     * Returns the filter object used.
+     *
+     * @return Filter
+     */
+    public function filter()
+    {
+        return $this->filter;
+    }
+
+    /**
+     * Returns the collected code coverage data.
+     * Set $raw = true to bypass all filters.
+     *
+     * @param bool $raw
+     *
+     * @return array
+     */
+    public function getData($raw = false)
+    {
+        if (!$raw && $this->addUncoveredFilesFromWhitelist) {
+            $this->addUncoveredFilesFromWhitelist();
+        }
+
+        return $this->data;
+    }
+
+    /**
+     * Sets the coverage data.
+     *
+     * @param array $data
+     */
+    public function setData(array $data)
+    {
+        $this->data   = $data;
+        $this->report = null;
+    }
+
+    /**
+     * Returns the test data.
+     *
+     * @return array
+     */
+    public function getTests()
+    {
+        return $this->tests;
+    }
+
+    /**
+     * Sets the test data.
+     *
+     * @param array $tests
+     */
+    public function setTests(array $tests)
+    {
+        $this->tests = $tests;
+    }
+
+    /**
+     * Start collection of code coverage information.
+     *
+     * @param mixed $id
+     * @param bool  $clear
+     *
+     * @throws InvalidArgumentException
+     */
+    public function start($id, $clear = false)
+    {
+        if (!is_bool($clear)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        if ($clear) {
+            $this->clear();
+        }
+
+        if ($this->isInitialized === false) {
+            $this->initializeData();
+        }
+
+        $this->currentId = $id;
+
+        $this->driver->start($this->shouldCheckForDeadAndUnused);
+    }
+
+    /**
+     * Stop collection of code coverage information.
+     *
+     * @param bool  $append
+     * @param mixed $linesToBeCovered
+     * @param array $linesToBeUsed
+     *
+     * @return array
+     *
+     * @throws InvalidArgumentException
+     */
+    public function stop($append = true, $linesToBeCovered = [], array $linesToBeUsed = [])
+    {
+        if (!is_bool($append)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        if (!is_array($linesToBeCovered) && $linesToBeCovered !== false) {
+            throw InvalidArgumentException::create(
+                2,
+                'array or false'
+            );
+        }
+
+        $data = $this->driver->stop();
+        $this->append($data, null, $append, $linesToBeCovered, $linesToBeUsed);
+
+        $this->currentId = null;
+
+        return $data;
+    }
+
+    /**
+     * Appends code coverage data.
+     *
+     * @param array $data
+     * @param mixed $id
+     * @param bool  $append
+     * @param mixed $linesToBeCovered
+     * @param array $linesToBeUsed
+     *
+     * @throws RuntimeException
+     */
+    public function append(array $data, $id = null, $append = true, $linesToBeCovered = [], array $linesToBeUsed = [])
+    {
+        if ($id === null) {
+            $id = $this->currentId;
+        }
+
+        if ($id === null) {
+            throw new RuntimeException;
+        }
+
+        $this->applyListsFilter($data);
+        $this->applyIgnoredLinesFilter($data);
+        $this->initializeFilesThatAreSeenTheFirstTime($data);
+
+        if (!$append) {
+            return;
+        }
+
+        if ($id != 'UNCOVERED_FILES_FROM_WHITELIST') {
+            $this->applyCoversAnnotationFilter(
+                $data,
+                $linesToBeCovered,
+                $linesToBeUsed
+            );
+        }
+
+        if (empty($data)) {
+            return;
+        }
+
+        $size   = 'unknown';
+        $status = null;
+
+        if ($id instanceof TestCase) {
+            $_size = $id->getSize();
+
+            if ($_size == \PHPUnit\Util\Test::SMALL) {
+                $size = 'small';
+            } elseif ($_size == \PHPUnit\Util\Test::MEDIUM) {
+                $size = 'medium';
+            } elseif ($_size == \PHPUnit\Util\Test::LARGE) {
+                $size = 'large';
+            }
+
+            $status = $id->getStatus();
+            $id     = get_class($id) . '::' . $id->getName();
+        } elseif ($id instanceof PhptTestCase) {
+            $size = 'large';
+            $id   = $id->getName();
+        }
+
+        $this->tests[$id] = ['size' => $size, 'status' => $status];
+
+        foreach ($data as $file => $lines) {
+            if (!$this->filter->isFile($file)) {
+                continue;
+            }
+
+            foreach ($lines as $k => $v) {
+                if ($v == Driver::LINE_EXECUTED) {
+                    if (empty($this->data[$file][$k]) || !in_array($id, $this->data[$file][$k])) {
+                        $this->data[$file][$k][] = $id;
+                    }
+                }
+            }
+        }
+
+        $this->report = null;
+    }
+
+    /**
+     * Merges the data from another instance.
+     *
+     * @param CodeCoverage $that
+     */
+    public function merge(CodeCoverage $that)
+    {
+        $this->filter->setWhitelistedFiles(
+            array_merge($this->filter->getWhitelistedFiles(), $that->filter()->getWhitelistedFiles())
+        );
+
+        foreach ($that->data as $file => $lines) {
+            if (!isset($this->data[$file])) {
+                if (!$this->filter->isFiltered($file)) {
+                    $this->data[$file] = $lines;
+                }
+
+                continue;
+            }
+
+            foreach ($lines as $line => $data) {
+                if ($data !== null) {
+                    if (!isset($this->data[$file][$line])) {
+                        $this->data[$file][$line] = $data;
+                    } else {
+                        $this->data[$file][$line] = array_unique(
+                            array_merge($this->data[$file][$line], $data)
+                        );
+                    }
+                }
+            }
+        }
+
+        $this->tests  = array_merge($this->tests, $that->getTests());
+        $this->report = null;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setCacheTokens($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->cacheTokens = $flag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCacheTokens()
+    {
+        return $this->cacheTokens;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setCheckForUnintentionallyCoveredCode($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->checkForUnintentionallyCoveredCode = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setForceCoversAnnotation($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->forceCoversAnnotation = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setCheckForMissingCoversAnnotation($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->checkForMissingCoversAnnotation = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setCheckForUnexecutedCoveredCode($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->checkForUnexecutedCoveredCode = $flag;
+    }
+
+    /**
+     * @deprecated
+     *
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setMapTestClassNameToCoveredClassName($flag)
+    {
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setAddUncoveredFilesFromWhitelist($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->addUncoveredFilesFromWhitelist = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setProcessUncoveredFilesFromWhitelist($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->processUncoveredFilesFromWhitelist = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setDisableIgnoredLines($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->disableIgnoredLines = $flag;
+    }
+
+    /**
+     * @param bool $flag
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setIgnoreDeprecatedCode($flag)
+    {
+        if (!is_bool($flag)) {
+            throw InvalidArgumentException::create(
+                1,
+                'boolean'
+            );
+        }
+
+        $this->ignoreDeprecatedCode = $flag;
+    }
+
+    /**
+     * @param array $whitelist
+     */
+    public function setUnintentionallyCoveredSubclassesWhitelist(array $whitelist)
+    {
+        $this->unintentionallyCoveredSubclassesWhitelist = $whitelist;
+    }
+
+    /**
+     * Applies the @covers annotation filtering.
+     *
+     * @param array $data
+     * @param mixed $linesToBeCovered
+     * @param array $linesToBeUsed
+     *
+     * @throws MissingCoversAnnotationException
+     * @throws UnintentionallyCoveredCodeException
+     */
+    private function applyCoversAnnotationFilter(array &$data, $linesToBeCovered, array $linesToBeUsed)
+    {
+        if ($linesToBeCovered === false ||
+            ($this->forceCoversAnnotation && empty($linesToBeCovered))) {
+            if ($this->checkForMissingCoversAnnotation) {
+                throw new MissingCoversAnnotationException;
+            }
+
+            $data = [];
+
+            return;
+        }
+
+        if (empty($linesToBeCovered)) {
+            return;
+        }
+
+        if ($this->checkForUnintentionallyCoveredCode &&
+            (!$this->currentId instanceof TestCase ||
+            (!$this->currentId->isMedium() && !$this->currentId->isLarge()))) {
+            $this->performUnintentionallyCoveredCodeCheck(
+                $data,
+                $linesToBeCovered,
+                $linesToBeUsed
+            );
+        }
+
+        if ($this->checkForUnexecutedCoveredCode) {
+            $this->performUnexecutedCoveredCodeCheck($data, $linesToBeCovered, $linesToBeUsed);
+        }
+
+        $data = array_intersect_key($data, $linesToBeCovered);
+
+        foreach (array_keys($data) as $filename) {
+            $_linesToBeCovered = array_flip($linesToBeCovered[$filename]);
+
+            $data[$filename] = array_intersect_key(
+                $data[$filename],
+                $_linesToBeCovered
+            );
+        }
+    }
+
+    /**
+     * Applies the whitelist filtering.
+     *
+     * @param array $data
+     */
+    private function applyListsFilter(array &$data)
+    {
+        foreach (array_keys($data) as $filename) {
+            if ($this->filter->isFiltered($filename)) {
+                unset($data[$filename]);
+            }
+        }
+    }
+
+    /**
+     * Applies the "ignored lines" filtering.
+     *
+     * @param array $data
+     */
+    private function applyIgnoredLinesFilter(array &$data)
+    {
+        foreach (array_keys($data) as $filename) {
+            if (!$this->filter->isFile($filename)) {
+                continue;
+            }
+
+            foreach ($this->getLinesToBeIgnored($filename) as $line) {
+                unset($data[$filename][$line]);
+            }
+        }
+    }
+
+    /**
+     * @param array $data
+     */
+    private function initializeFilesThatAreSeenTheFirstTime(array $data)
+    {
+        foreach ($data as $file => $lines) {
+            if ($this->filter->isFile($file) && !isset($this->data[$file])) {
+                $this->data[$file] = [];
+
+                foreach ($lines as $k => $v) {
+                    $this->data[$file][$k] = $v == -2 ? null : [];
+                }
+            }
+        }
+    }
+
+    /**
+     * Processes whitelisted files that are not covered.
+     */
+    private function addUncoveredFilesFromWhitelist()
+    {
+        $data           = [];
+        $uncoveredFiles = array_diff(
+            $this->filter->getWhitelist(),
+            array_keys($this->data)
+        );
+
+        foreach ($uncoveredFiles as $uncoveredFile) {
+            if (!file_exists($uncoveredFile)) {
+                continue;
+            }
+
+            if (!$this->processUncoveredFilesFromWhitelist) {
+                $data[$uncoveredFile] = [];
+
+                $lines = count(file($uncoveredFile));
+
+                for ($i = 1; $i <= $lines; $i++) {
+                    $data[$uncoveredFile][$i] = Driver::LINE_NOT_EXECUTED;
+                }
+            }
+        }
+
+        $this->append($data, 'UNCOVERED_FILES_FROM_WHITELIST');
+    }
+
+    /**
+     * Returns the lines of a source file that should be ignored.
+     *
+     * @param string $filename
+     *
+     * @return array
+     *
+     * @throws InvalidArgumentException
+     */
+    private function getLinesToBeIgnored($filename)
+    {
+        if (!is_string($filename)) {
+            throw InvalidArgumentException::create(
+                1,
+                'string'
+            );
+        }
+
+        if (!isset($this->ignoredLines[$filename])) {
+            $this->ignoredLines[$filename] = [];
+
+            if ($this->disableIgnoredLines) {
+                return $this->ignoredLines[$filename];
+            }
+
+            $ignore   = false;
+            $stop     = false;
+            $lines    = file($filename);
+            $numLines = count($lines);
+
+            foreach ($lines as $index => $line) {
+                if (!trim($line)) {
+                    $this->ignoredLines[$filename][] = $index + 1;
+                }
+            }
+
+            if ($this->cacheTokens) {
+                $tokens = \PHP_Token_Stream_CachingFactory::get($filename);
+            } else {
+                $tokens = new \PHP_Token_Stream($filename);
+            }
+
+            $classes = array_merge($tokens->getClasses(), $tokens->getTraits());
+            $tokens  = $tokens->tokens();
+
+            foreach ($tokens as $token) {
+                switch (get_class($token)) {
+                    case \PHP_Token_COMMENT::class:
+                    case \PHP_Token_DOC_COMMENT::class:
+                        $_token = trim($token);
+                        $_line  = trim($lines[$token->getLine() - 1]);
+
+                        if ($_token == '// @codeCoverageIgnore' ||
+                            $_token == '//@codeCoverageIgnore') {
+                            $ignore = true;
+                            $stop   = true;
+                        } elseif ($_token == '// @codeCoverageIgnoreStart' ||
+                            $_token == '//@codeCoverageIgnoreStart') {
+                            $ignore = true;
+                        } elseif ($_token == '// @codeCoverageIgnoreEnd' ||
+                            $_token == '//@codeCoverageIgnoreEnd') {
+                            $stop = true;
+                        }
+
+                        if (!$ignore) {
+                            $start = $token->getLine();
+                            $end   = $start + substr_count($token, "\n");
+
+                            // Do not ignore the first line when there is a token
+                            // before the comment
+                            if (0 !== strpos($_token, $_line)) {
+                                $start++;
+                            }
+
+                            for ($i = $start; $i < $end; $i++) {
+                                $this->ignoredLines[$filename][] = $i;
+                            }
+
+                            // A DOC_COMMENT token or a COMMENT token starting with "/*"
+                            // does not contain the final \n character in its text
+                            if (isset($lines[$i - 1]) && 0 === strpos($_token, '/*') && '*/' === substr(trim($lines[$i - 1]), -2)) {
+                                $this->ignoredLines[$filename][] = $i;
+                            }
+                        }
+                        break;
+
+                    case \PHP_Token_INTERFACE::class:
+                    case \PHP_Token_TRAIT::class:
+                    case \PHP_Token_CLASS::class:
+                    case \PHP_Token_FUNCTION::class:
+                        /* @var \PHP_Token_Interface $token */
+
+                        $docblock = $token->getDocblock();
+
+                        $this->ignoredLines[$filename][] = $token->getLine();
+
+                        if (strpos($docblock, '@codeCoverageIgnore') || ($this->ignoreDeprecatedCode && strpos($docblock, '@deprecated'))) {
+                            $endLine = $token->getEndLine();
+
+                            for ($i = $token->getLine(); $i <= $endLine; $i++) {
+                                $this->ignoredLines[$filename][] = $i;
+                            }
+                        } elseif ($token instanceof \PHP_Token_INTERFACE ||
+                            $token instanceof \PHP_Token_TRAIT ||
+                            $token instanceof \PHP_Token_CLASS) {
+                            if (empty($classes[$token->getName()]['methods'])) {
+                                for ($i = $token->getLine();
+                                     $i <= $token->getEndLine();
+                                     $i++) {
+                                    $this->ignoredLines[$filename][] = $i;
+                                }
+                            } else {
+                                $firstMethod = array_shift(
+                                    $classes[$token->getName()]['methods']
+                                );
+
+                                do {
+                                    $lastMethod = array_pop(
+                                        $classes[$token->getName()]['methods']
+                                    );
+                                } while ($lastMethod !== null &&
+                                    substr($lastMethod['signature'], 0, 18) == 'anonymous function');
+
+                                if ($lastMethod === null) {
+                                    $lastMethod = $firstMethod;
+                                }
+
+                                for ($i = $token->getLine();
+                                     $i < $firstMethod['startLine'];
+                                     $i++) {
+                                    $this->ignoredLines[$filename][] = $i;
+                                }
+
+                                for ($i = $token->getEndLine();
+                                     $i > $lastMethod['endLine'];
+                                     $i--) {
+                                    $this->ignoredLines[$filename][] = $i;
+                                }
+                            }
+                        }
+                        break;
+
+                    case \PHP_Token_ENUM::class:
+                        $this->ignoredLines[$filename][] = $token->getLine();
+                        break;
+
+                    case \PHP_Token_NAMESPACE::class:
+                        $this->ignoredLines[$filename][] = $token->getEndLine();
+
+                    // Intentional fallthrough
+                    case \PHP_Token_DECLARE::class:
+                    case \PHP_Token_OPEN_TAG::class:
+                    case \PHP_Token_CLOSE_TAG::class:
+                    case \PHP_Token_USE::class:
+                        $this->ignoredLines[$filename][] = $token->getLine();
+                        break;
+                }
+
+                if ($ignore) {
+                    $this->ignoredLines[$filename][] = $token->getLine();
+
+                    if ($stop) {
+                        $ignore = false;
+                        $stop   = false;
+                    }
+                }
+            }
+
+            $this->ignoredLines[$filename][] = $numLines + 1;
+
+            $this->ignoredLines[$filename] = array_unique(
+                $this->ignoredLines[$filename]
+            );
+
+            sort($this->ignoredLines[$filename]);
+        }
+
+        return $this->ignoredLines[$filename];
+    }
+
+    /**
+     * @param array $data
+     * @param array $linesToBeCovered
+     * @param array $linesToBeUsed
+     *
+     * @throws UnintentionallyCoveredCodeException
+     */
+    private function performUnintentionallyCoveredCodeCheck(array &$data, array $linesToBeCovered, array $linesToBeUsed)
+    {
+        $allowedLines = $this->getAllowedLines(
+            $linesToBeCovered,
+            $linesToBeUsed
+        );
+
+        $unintentionallyCoveredUnits = [];
+
+        foreach ($data as $file => $_data) {
+            foreach ($_data as $line => $flag) {
+                if ($flag == 1 && !isset($allowedLines[$file][$line])) {
+                    $unintentionallyCoveredUnits[] = $this->wizard->lookup($file, $line);
+                }
+            }
+        }
+
+        $unintentionallyCoveredUnits = $this->processUnintentionallyCoveredUnits($unintentionallyCoveredUnits);
+
+        if (!empty($unintentionallyCoveredUnits)) {
+            throw new UnintentionallyCoveredCodeException(
+                $unintentionallyCoveredUnits
+            );
+        }
+    }
+
+    /**
+     * @param array $data
+     * @param array $linesToBeCovered
+     * @param array $linesToBeUsed
+     *
+     * @throws CoveredCodeNotExecutedException
+     */
+    private function performUnexecutedCoveredCodeCheck(array &$data, array $linesToBeCovered, array $linesToBeUsed)
+    {
+        $executedCodeUnits = $this->coverageToCodeUnits($data);
+        $message           = '';
+
+        foreach ($this->linesToCodeUnits($linesToBeCovered) as $codeUnit) {
+            if (!in_array($codeUnit, $executedCodeUnits)) {
+                $message .= sprintf(
+                    '- %s is expected to be executed (@covers) but was not executed' . "\n",
+                    $codeUnit
+                );
+            }
+        }
+
+        foreach ($this->linesToCodeUnits($linesToBeUsed) as $codeUnit) {
+            if (!in_array($codeUnit, $executedCodeUnits)) {
+                $message .= sprintf(
+                    '- %s is expected to be executed (@uses) but was not executed' . "\n",
+                    $codeUnit
+                );
+            }
+        }
+
+        if (!empty($message)) {
+            throw new CoveredCodeNotExecutedException($message);
+        }
+    }
+
+    /**
+     * @param array $linesToBeCovered
+     * @param array $linesToBeUsed
+     *
+     * @return array
+     */
+    private function getAllowedLines(array $linesToBeCovered, array $linesToBeUsed)
+    {
+        $allowedLines = [];
+
+        foreach (array_keys($linesToBeCovered) as $file) {
+            if (!isset($allowedLines[$file])) {
+                $allowedLines[$file] = [];
+            }
+
+            $allowedLines[$file] = array_merge(
+                $allowedLines[$file],
+                $linesToBeCovered[$file]
+            );
+        }
+
+        foreach (array_keys($linesToBeUsed) as $file) {
+            if (!isset($allowedLines[$file])) {
+                $allowedLines[$file] = [];
+            }
+
+            $allowedLines[$file] = array_merge(
+                $allowedLines[$file],
+                $linesToBeUsed[$file]
+            );
+        }
+
+        foreach (array_keys($allowedLines) as $file) {
+            $allowedLines[$file] = array_flip(
+                array_unique($allowedLines[$file])
+            );
+        }
+
+        return $allowedLines;
+    }
+
+    /**
+     * @return Driver
+     *
+     * @throws RuntimeException
+     */
+    private function selectDriver()
+    {
+        $runtime = new Runtime;
+
+        if (!$runtime->canCollectCodeCoverage()) {
+            throw new RuntimeException('No code coverage driver available');
+        }
+
+        if ($runtime->isHHVM()) {
+            return new HHVM;
+        } elseif ($runtime->isPHPDBG()) {
+            return new PHPDBG;
+        } else {
+            return new Xdebug;
+        }
+    }
+
+    /**
+     * @param array $unintentionallyCoveredUnits
+     *
+     * @return array
+     */
+    private function processUnintentionallyCoveredUnits(array $unintentionallyCoveredUnits)
+    {
+        $unintentionallyCoveredUnits = array_unique($unintentionallyCoveredUnits);
+        sort($unintentionallyCoveredUnits);
+
+        foreach (array_keys($unintentionallyCoveredUnits) as $k => $v) {
+            $unit = explode('::', $unintentionallyCoveredUnits[$k]);
+
+            if (count($unit) != 2) {
+                continue;
+            }
+
+            $class = new \ReflectionClass($unit[0]);
+
+            foreach ($this->unintentionallyCoveredSubclassesWhitelist as $whitelis

@@ -1,0 +1,2489 @@
+/*!
+ * elFinder - file manager for web
+ * Version 2.1.49 (2019-04-17)
+ * http://elfinder.org
+ * 
+ * Copyright 2009-2019, Studio 42
+ * Licensed under a 3-clauses BSD license
+ */
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD
+		define(['jquery','jquery-ui'], factory);
+	} else if (typeof exports !== 'undefined') {
+		// CommonJS
+		var $, ui;
+		try {
+			$ = require('jquery');
+			ui = require('jquery-ui');
+		} catch (e) {}
+		module.exports = factory($, ui);
+	} else {
+		// Browser globals (Note: root is window)
+		factory(root.jQuery, root.jQuery.ui, true);
+	}
+}(this, function($, _ui, toGlobal) {
+toGlobal = toGlobal || false;
+
+
+/*
+ * File: /js/elFinder.js
+ */
+
+/**
+ * @class elFinder - file manager for web
+ *
+ * @author Dmitry (dio) Levashov
+ **/
+var elFinder = function(elm, opts, bootCallback) {
+		//this.time('load');
+	var self = this,
+		
+		/**
+		 * Objects array of jQuery.Deferred that calls before elFinder boot up
+		 * 
+		 * @type Array
+		 */
+		dfrdsBeforeBootup = [],
+		
+		/**
+		 * Plugin name to check for conflicts with bootstrap etc
+		 *
+		 * @type Array
+		 **/
+		conflictChecks = ['button', 'tooltip'],
+		
+		/**
+		 * Node on which elfinder creating
+		 *
+		 * @type jQuery
+		 **/
+		node = $(elm),
+		
+		/**
+		 * Object of events originally registered in this node
+		 * 
+		 * @type Object
+		 */
+		prevEvents = $.extend(true, {}, $._data(node.get(0), 'events')),
+		
+		/**
+		 * Store node contents.
+		 *
+		 * @see this.destroy
+		 * @type jQuery
+		 **/
+		prevContent = $('<div/>').append(node.contents()).attr('class', node.attr('class') || '').attr('style', node.attr('style') || ''),
+		
+		/**
+		 * Instance ID. Required to get/set cookie
+		 *
+		 * @type String
+		 **/
+		id = node.attr('id') || node.attr('id', 'elfauto' + $('.elfinder').length).attr('id'),
+		
+		/**
+		 * Events namespace
+		 *
+		 * @type String
+		 **/
+		namespace = 'elfinder-' + id,
+		
+		/**
+		 * Mousedown event
+		 *
+		 * @type String
+		 **/
+		mousedown = 'mousedown.'+namespace,
+		
+		/**
+		 * Keydown event
+		 *
+		 * @type String
+		 **/
+		keydown = 'keydown.'+namespace,
+		
+		/**
+		 * Keypress event
+		 *
+		 * @type String
+		 **/
+		keypress = 'keypress.'+namespace,
+		
+		/**
+		 * Keypup event
+		 *
+		 * @type String
+		 **/
+		keyup    = 'keyup.'+namespace,
+
+		/**
+		 * Is shortcuts/commands enabled
+		 *
+		 * @type Boolean
+		 **/
+		enabled = false,
+		
+		/**
+		 * Store enabled value before ajax request
+		 *
+		 * @type Boolean
+		 **/
+		prevEnabled = false,
+		
+		/**
+		 * List of build-in events which mapped into methods with same names
+		 *
+		 * @type Array
+		 **/
+		events = ['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'selectfiles', 'unselectfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'],
+		
+		/**
+		 * Rules to validate data from backend
+		 *
+		 * @type Object
+		 **/
+		rules = {},
+		
+		/**
+		 * Current working directory hash
+		 *
+		 * @type String
+		 **/
+		cwd = '',
+		
+		/**
+		 * Current working directory options default
+		 *
+		 * @type Object
+		 **/
+		cwdOptionsDefault = {
+			path          : '',
+			url           : '',
+			tmbUrl        : '',
+			disabled      : [],
+			separator     : '/',
+			archives      : [],
+			extract       : [],
+			copyOverwrite : true,
+			uploadOverwrite : true,
+			uploadMaxSize : 0,
+			jpgQuality    : 100,
+			tmbCrop       : false,
+			tmb           : false // old API
+		},
+		
+		/**
+		 * Current working directory options
+		 *
+		 * @type Object
+		 **/
+		cwdOptions = {},
+		
+		/**
+		 * Files/dirs cache
+		 *
+		 * @type Object
+		 **/
+		files = {},
+		
+		/**
+		 * Hidden Files/dirs cache
+		 *
+		 * @type Object
+		 **/
+		hiddenFiles = {},
+
+		/**
+		 * Files/dirs hash cache of each dirs
+		 *
+		 * @type Object
+		 **/
+		ownFiles = {},
+		
+		/**
+		 * Selected files hashes
+		 *
+		 * @type Array
+		 **/
+		selected = [],
+		
+		/**
+		 * Events listeners
+		 *
+		 * @type Object
+		 **/
+		listeners = {},
+		
+		/**
+		 * Shortcuts
+		 *
+		 * @type Object
+		 **/
+		shortcuts = {},
+		
+		/**
+		 * Buffer for copied files
+		 *
+		 * @type Array
+		 **/
+		clipboard = [],
+		
+		/**
+		 * Copied/cuted files hashes
+		 * Prevent from remove its from cache.
+		 * Required for dispaly correct files names in error messages
+		 *
+		 * @type Object
+		 **/
+		remember = {},
+		
+		/**
+		 * Queue for 'open' requests
+		 *
+		 * @type Array
+		 **/
+		queue = [],
+		
+		/**
+		 * Queue for only cwd requests e.g. `tmb`
+		 *
+		 * @type Array
+		 **/
+		cwdQueue = [],
+		
+		/**
+		 * Commands prototype
+		 *
+		 * @type Object
+		 **/
+		base = new self.command(self),
+		
+		/**
+		 * elFinder node width
+		 *
+		 * @type String
+		 * @default "auto"
+		 **/
+		width  = 'auto',
+		
+		/**
+		 * elFinder node height
+		 * Number: pixcel or String: Number + "%"
+		 *
+		 * @type Number | String
+		 * @default 400
+		 **/
+		height = 400,
+		
+		/**
+		 * Base node object or selector
+		 * Element which is the reference of the height percentage
+		 *
+		 * @type Object|String
+		 * @default null | $(window) (if height is percentage)
+		 **/
+		heightBase = null,
+		
+		/**
+		 * MIME type list(Associative array) handled as a text file
+		 * 
+		 * @type Object|null
+		 */
+		textMimes = null,
+		
+		/**
+		 * elfinder path for sound played on remove
+		 * @type String
+		 * @default ./sounds/
+		 **/
+		soundPath = 'sounds/',
+		
+		/**
+		 * JSON.stringify of previous fm.sorters
+		 * @type String
+		 */
+		prevSorterStr = '',
+
+		/**
+		 * Map table of file extention to MIME-Type
+		 * @type Object
+		 */
+		extToMimeTable,
+
+		/**
+		 * Disabled page unload function
+		 * @type Boolean
+		 */
+		diableUnloadCheck = false,
+
+		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
+			
+		syncInterval,
+		autoSyncStop = 0,
+		
+		uiCmdMapPrev = '',
+		
+		gcJobRes = null,
+		
+		open = function(data) {
+			// NOTES: Do not touch data object
+		
+			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {},
+				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr;
+			
+			if (self.api >= 2.1) {
+				// support volume driver option `uiCmdMap`
+				self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
+				if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
+					uiCmdMapPrev = JSON.stringify(self.commandMap);
+				}
+			} else {
+				self.options.sync = 0;
+			}
+			
+			if (data.init) {
+				// init - reset cache
+				files = {};
+				ownFiles = {};
+			} else {
+				// remove only files from prev cwd
+				// and collapsed directory (included 100+ directories) to empty for perfomance tune in DnD
+				prevcwd = cwd;
+				rmClass = 'elfinder-subtree-loaded ' + self.res('class', 'navexpand');
+				collapsed = self.res('class', 'navcollapse');
+				hashes = Object.keys(files);
+				calc = function(i) {
+					if (!files[i]) {
+						return true;
+					}
+					
+					var isDir = (files[i].mime === 'directory'),
+						phash = files[i].phash,
+						pnav;
+						
+					if (
+						(!isDir
+							|| emptyDirs[phash]
+							|| (!stayDirs[phash]
+								&& self.navHash2Elm(files[i].hash).is(':hidden')
+								&& self.navHash2Elm(phash).next('.elfinder-navbar-subtree').children().length > 100
+							)
+						)
+						&& (isDir || phash !== cwd)
+						&& ! remember[i]
+					) {
+						if (isDir && !emptyDirs[phash]) {
+							emptyDirs[phash] = true;
+							self.navHash2Elm(phash)
+							 .removeClass(rmClass)
+							 .next('.elfinder-navbar-subtree').empty();
+						}
+						deleteCache(files[i]);
+					} else if (isDir) {
+						stayDirs[phash] = true;
+					}
+				};
+				gc = function() {
+					if (hashes.length) {
+						gcJobRes && gcJobRes._abort();
+						gcJobRes = self.asyncJob(calc, hashes, {
+							interval : 20,
+							numPerOnce : 100
+						}).done(function() {
+							var hd = self.storage('hide') || {items: {}};
+							if (Object.keys(hiddenFiles).length) {
+								$.each(hiddenFiles, function(h) {
+									if (!hd.items[h]) {
+										delete hiddenFiles[h];
+									}
+								});
+							}
+						});
+					}
+				};
+				
+				self.trigger('filesgc').one('filesgc', function() {
+					hashes = [];
+				});
+				
+				self.one('opendone', function() {
+					if (prevcwd !== cwd) {
+						if (! node.data('lazycnt')) {
+							gc();
+						} else {
+							self.one('lazydone', gc);
+						}
+					}
+				});
+			}
+
+			self.sorters = {};
+			cwd = data.cwd.hash;
+			cache(data.files);
+			if (!files[cwd]) {
+				cache([data.cwd]);
+			}
+
+			// trigger event 'sorterupdate'
+			sorterStr = JSON.stringify(self.sorters);
+			if (prevSorterStr !== sorterStr) {
+				self.trigger('sorterupdate');
+				prevSorterStr = sorterStr;
+			}
+
+			self.lastDir(cwd);
+			
+			self.autoSync();
+		},
+		
+		/**
+		 * Store info about files/dirs in "files" object.
+		 *
+		 * @param  Array  files
+		 * @param  String data type
+		 * @return void
+		 **/
+		cache = function(data, type) {
+			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
+				sorterChk = !self.sorters._checked,
+				l         = data.length,
+				setSorter = function(file) {
+					var f = file || {},
+						sorters = [];
+					$.each(self.sortRules, function(key) {
+						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
+							sorters.push(key);
+						}
+					});
+					self.sorters = self.arrayFlip(sorters, true);
+					self.sorters._checked = true;
+				},
+				keeps = ['sizeInfo'],
+				changedParents = {},
+				hideData = self.storage('hide') || {},
+				hides = hideData.items || {},
+				f, i, keepProp, parents, hidden;
+
+			for (i = 0; i < l; i++) {
+				f = Object.assign({}, data[i]);
+				hidden = (!hideData.show && hides[f.hash])? true : false;
+				if (f.name && f.hash && f.mime) {
+					if (!hidden) {
+						if (sorterChk && f.phash === cwd) {
+							setSorter(f);
+							sorterChk = false;
+						}
+						
+						if (f.phash && (type === 'add' || type === 'change')) {
+							if (parents = self.parents(f.phash)) {
+								$.each(parents, function() {
+									changedParents[this] = true;
+								});
+							}
+						}
+					}
+
+					if (files[f.hash]) {
+						$.each(keeps, function() {
+							if(files[f.hash][this] && ! f[this]) {
+								f[this] = files[f.hash][this];
+							}
+						});
+						if (f.sizeInfo && !f.size) {
+							f.size = f.sizeInfo.size;
+						}
+						deleteCache(files[f.hash], true);
+					}
+					if (hides[f.hash]) {
+						hiddenFiles[f.hash] = f;
+					}
+					if (hidden) {
+						l--;
+						data.splice(i--, 1);
+					} else {
+						files[f.hash] = f;
+						if (f.mime === 'directory' && !ownFiles[f.hash]) {
+							ownFiles[f.hash] = {};
+						}
+						if (f.phash) {
+							if (!ownFiles[f.phash]) {
+								ownFiles[f.phash] = {};
+							}
+							ownFiles[f.phash][f.hash] = true;
+						}
+					}
+				}
+			}
+			// delete sizeInfo cache
+			$.each(Object.keys(changedParents), function() {
+				var target = files[this];
+				if (target && target.sizeInfo) {
+					delete target.sizeInfo;
+				}
+			});
+			
+			// for empty folder
+			sorterChk && setSorter();
+		},
+		
+		/**
+		 * Delete file object from files caches
+		 * 
+		 * @param  Array  removed hashes
+		 * @return void
+		 */
+		remove = function(removed) {
+			var l       = removed.length,
+				roots   = {},
+				rm      = function(hash) {
+					var file = files[hash], i;
+					if (file) {
+						if (file.mime === 'directory') {
+							if (roots[hash]) {
+								delete self.roots[roots[hash]];
+							}
+							// restore stats of deleted root parent directory
+							$.each(self.leafRoots, function(phash, roots) {
+								var idx, pdir;
+								if ((idx = $.inArray(hash, roots))!== -1) {
+									if (roots.length === 1) {
+										if ((pdir = Object.assign({}, files[phash])) && pdir._realStats) {
+											$.each(pdir._realStats, function(k, v) {
+												pdir[k] = v;
+											});
+											remove(files[phash]._realStats);
+											self.change({ changed: [pdir] });
+										}
+										delete self.leafRoots[phash];
+									} else {
+										self.leafRoots[phash].splice(idx, 1);
+									}
+								}
+							});
+							if (self.searchStatus.state < 2) {
+								$.each(files, function(h, f) {
+									f.phash == hash && rm(h);
+								});
+							}
+						}
+						if (file.phash) {
+							if (parents = self.parents(file.phash)) {
+								$.each(parents, function() {
+									changedParents[this] = true;
+								});
+							}
+						}
+						deleteCache(files[hash]);
+					}
+				},
+				changedParents = {},
+				parents;
+		
+			$.each(self.roots, function(k, v) {
+				roots[v] = k;
+			});
+			while (l--) {
+				rm(removed[l]);
+			}
+			// delete sizeInfo cache
+			$.each(Object.keys(changedParents), function() {
+				var target = files[this];
+				if (target && target.sizeInfo) {
+					delete target.sizeInfo;
+				}
+			});
+		},
+		
+		/**
+		 * Update file object in files caches
+		 * 
+		 * @param  Array  changed file objects
+		 * @return void
+		 */
+		change = function(changed) {
+			$.each(changed, function(i, file) {
+				var hash = file.hash;
+				if (files[hash]) {
+					$.each(Object.keys(files[hash]), function(i, v){
+						if (typeof file[v] === 'undefined') {
+							delete files[hash][v];
+						}
+					});
+				}
+				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
+			});
+		},
+		
+		/**
+		 * Delete cache data of files, ownFiles and self.optionsByHashes
+		 * 
+		 * @param  Object  file
+		 * @param  Boolean update
+		 * @return void
+		 */
+		deleteCache = function(file, update) {
+			var hash = file.hash,
+				phash = file.phash;
+			
+			if (phash && ownFiles[phash]) {
+				 delete ownFiles[phash][hash];
+			}
+			if (!update) {
+				ownFiles[hash] && delete ownFiles[hash];
+				self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			}
+			delete files[hash];
+		},
+		
+		/**
+		 * Maximum number of concurrent connections on request
+		 * 
+		 * @type Number
+		 */
+		requestMaxConn,
+		
+		/**
+		 * Current number of connections
+		 * 
+		 * @type Number
+		 */
+		requestCnt = 0,
+		
+		/**
+		 * Queue waiting for connection
+		 * 
+		 * @type Array
+		 */
+		requestQueue = [],
+		
+		/**
+		 * Flag to cancel the `open` command waiting for connection
+		 * 
+		 * @type Boolean
+		 */
+		requestQueueSkipOpen = false,
+		
+		/**
+		 * Exec shortcut
+		 *
+		 * @param  jQuery.Event  keydown/keypress event
+		 * @return void
+		 */
+		execShortcut = function(e) {
+			var code    = e.keyCode,
+				ctrlKey = !!(e.ctrlKey || e.metaKey),
+				isMousedown = e.type === 'mousedown',
+				ddm;
+
+			!isMousedown && (self.keyState.keyCode = code);
+			self.keyState.ctrlKey  = ctrlKey;
+			self.keyState.shiftKey = e.shiftKey;
+			self.keyState.metaKey  = e.metaKey;
+			self.keyState.altKey   = e.altKey;
+			if (isMousedown) {
+				return;
+			} else if (e.type === 'keyup') {
+				self.keyState.keyCode = null;
+				return;
+			}
+
+			if (enabled) {
+
+				$.each(shortcuts, function(i, shortcut) {
+					if (shortcut.type    == e.type 
+					&& shortcut.keyCode  == code 
+					&& shortcut.shiftKey == e.shiftKey 
+					&& shortcut.ctrlKey  == ctrlKey 
+					&& shortcut.altKey   == e.altKey) {
+						e.preventDefault();
+						e.stopPropagation();
+						shortcut.callback(e, self);
+						self.debug('shortcut-exec', i+' : '+shortcut.description);
+					}
+				});
+				
+				// prevent tab out of elfinder
+				if (code == $.ui.keyCode.TAB && !$(e.target).is(':input')) {
+					e.preventDefault();
+				}
+				
+				// cancel any actions by [Esc] key
+				if (e.type === 'keydown' && code == $.ui.keyCode.ESCAPE) {
+					// copy or cut 
+					if (! node.find('.ui-widget:visible').length) {
+						self.clipboard().length && self.clipboard([]);
+					}
+					// dragging
+					if ($.ui.ddmanager) {
+						ddm = $.ui.ddmanager.current;
+						ddm && ddm.helper && ddm.cancel();
+					}
+					// button menus
+					self.toHide(node.find('.ui-widget.elfinder-button-menu.elfinder-frontmost:visible'));
+					// trigger keydownEsc
+					self.trigger('keydownEsc', e);
+				}
+
+			}
+		},
+		date = new Date(),
+		utc,
+		i18n,
+		inFrame = (window.parent !== window),
+		parentIframe = (function() {
+			var pifm, ifms;
+			if (inFrame) {
+				try {
+					ifms = $('iframe', window.parent.document);
+					if (ifms.length) {
+						$.each(ifms, function(i, ifm) {
+							if (ifm.contentWindow === window) {
+								pifm = $(ifm);
+								return false;
+							}
+						});
+					}
+				} catch(e) {}
+			}
+			return pifm;
+		})(),
+		/**
+		 * elFinder boot up function
+		 * 
+		 * @type Function
+		 */
+		bootUp,
+		/**
+		 * Original function of XMLHttpRequest.prototype.send
+		 * 
+		 * @type Function
+		 */
+		savedXhrSend;
+	
+	// opts must be an object
+	if (!opts) {
+		opts = {};
+	}
+	
+	// set UA.Angle, UA.Rotated for mobile devices
+	if (self.UA.Mobile) {
+		$(window).on('orientationchange.'+namespace, function() {
+			var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
+			if (a === -90) {
+				a = 270;
+			}
+			self.UA.Angle = a;
+			self.UA.Rotated = a % 180 === 0? false : true;
+		}).trigger('orientationchange.'+namespace);
+	}
+	
+	// check opt.bootCallback
+	if (opts.bootCallback && typeof opts.bootCallback === 'function') {
+		(function() {
+			var func = bootCallback,
+				opFunc = opts.bootCallback;
+			bootCallback = function(fm, extraObj) {
+				func && typeof func === 'function' && func.call(this, fm, extraObj);
+				opFunc.call(this, fm, extraObj);
+			};
+		})();
+	}
+	delete opts.bootCallback;
+
+	/**
+	 * Protocol version
+	 *
+	 * @type String
+	 **/
+	this.api = null;
+	
+	/**
+	 * elFinder use new api
+	 *
+	 * @type Boolean
+	 **/
+	this.newAPI = false;
+	
+	/**
+	 * elFinder use old api
+	 *
+	 * @type Boolean
+	 **/
+	this.oldAPI = false;
+	
+	/**
+	 * Net drivers names
+	 *
+	 * @type Array
+	 **/
+	this.netDrivers = [];
+	
+	/**
+	 * Base URL of elfFinder library starting from Manager HTML
+	 * 
+	 * @type String
+	 */
+	this.baseUrl = '';
+	
+	/**
+	 * Base URL of i18n js files
+	 * baseUrl + "js/i18n/" when empty value
+	 * 
+	 * @type String
+	 */
+	this.i18nBaseUrl = '';
+
+	/**
+	 * Is elFinder CSS loaded
+	 * 
+	 * @type Boolean
+	 */
+	this.cssloaded = false;
+	
+	/**
+	 * Current theme object
+	 * 
+	 * @type Object|Null
+	 */
+	this.theme = null;
+
+	this.mimesCanMakeEmpty = {};
+
+	/**
+	 * Callback function at boot up that option specified at elFinder starting
+	 * 
+	 * @type Function
+	 */
+	this.bootCallback;
+
+	/**
+	 * Callback function at reload(restart) elFinder 
+	 * 
+	 * @type Function
+	 */
+	this.reloadCallback;
+
+	/**
+	 * ID. Required to create unique cookie name
+	 *
+	 * @type String
+	 **/
+	this.id = id;
+
+	/**
+	 * Method to store/fetch data
+	 *
+	 * @type Function
+	 **/
+	this.storage = (function() {
+		try {
+			if ('localStorage' in window && window.localStorage !== null) {
+				if (self.UA.Safari) {
+					// check for Mac/iOS safari private browsing mode
+					window.localStorage.setItem('elfstoragecheck', 1);
+					window.localStorage.removeItem('elfstoragecheck');
+				}
+				return self.localStorage;
+			} else {
+				return self.cookie;
+			}
+		} catch (e) {
+			return self.cookie;
+		}
+	})();
+
+	/**
+	 * Set pause page unload check function or Get state
+	 *
+	 * @param      Boolean   state   To set state
+	 * @param      Boolean   keep    Keep disabled
+	 * @return     Boolean|void
+	 */
+	this.pauseUnloadCheck = function(state, keep) {
+		if (typeof state === 'undefined') {
+			return diableUnloadCheck;
+		} else {
+			diableUnloadCheck = !!state;
+			if (state && !keep) {
+				requestAnimationFrame(function() {
+					diableUnloadCheck = false;
+				});
+			}
+		}
+	};
+
+	/**
+	 * Configuration options
+	 *
+	 * @type Object
+	 **/
+	//this.options = $.extend(true, {}, this._options, opts);
+	this.options = Object.assign({}, this._options);
+	
+	// for old type configuration
+	if (opts.uiOptions) {
+		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
+			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
+				self.options.uiOptions.toolbarExtra = Object.assign(self.options.uiOptions.toolbarExtra || {}, opts.uiOptions.toolbar.pop());
+			}
+		}
+	}
+	
+	// Overwrite if opts value is an array
+	(function() {
+		var arrOv = function(obj, base) {
+			if ($.isPlainObject(obj)) {
+				$.each(obj, function(k, v) {
+					if ($.isPlainObject(v)) {
+						if (!base[k]) {
+							base[k] = {};
+						}
+						arrOv(v, base[k]);
+					} else {
+						base[k] = v;
+					}
+				});
+			}
+		};
+		arrOv(opts, self.options);
+	})();
+	
+	// join toolbarExtra to toolbar
+	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
+	delete this.options.uiOptions.toolbarExtra;
+
+	/**
+	 * Arrays that has to unbind events
+	 * 
+	 * @type Object
+	 */
+	this.toUnbindEvents = {};
+	
+	/**
+	 * Attach listener to events
+	 * To bind to multiply events at once, separate events names by space
+	 * 
+	 * @param  String  event(s) name(s)
+	 * @param  Object  event handler or {done: handler}
+	 * @param  Boolean priority first
+	 * @return elFinder
+	 */
+	this.bind = function(event, callback, priorityFirst) {
+		var i, len;
+		
+		if (callback && (typeof callback === 'function' || typeof callback.done === 'function')) {
+			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
+			
+			len = event.length;
+			for (i = 0; i < len; i++) {
+				if (listeners[event[i]] === void(0)) {
+					listeners[event[i]] = [];
+				}
+				listeners[event[i]][priorityFirst? 'unshift' : 'push'](callback);
+			}
+		}
+		return this;
+	};
+	
+	/**
+	 * Remove event listener if exists
+	 * To un-bind to multiply events at once, separate events names by space
+	 *
+	 * @param  String    event(s) name(s)
+	 * @param  Function  callback
+	 * @return elFinder
+	 */
+	this.unbind = function(event, callback) {
+		var i, len, l, ci;
+		
+		event = ('' + event).toLowerCase().split(/\s+/);
+		
+		len = event.length;
+		for (i = 0; i < len; i++) {
+			if (l = listeners[event[i]]) {
+				ci = $.inArray(callback, l);
+				ci > -1 && l.splice(ci, 1);
+			}
+		}
+		
+		callback = null;
+		return this;
+	};
+	
+	/**
+	 * Fire event - send notification to all event listeners
+	 * In the callback `this` becames an event object
+	 *
+	 * @param  String   event type
+	 * @param  Object   data to send across event
+	 * @param  Boolean  allow modify data (call by reference of data) default: true
+	 * @return elFinder
+	 */
+	this.trigger = function(evType, data, allowModify) {
+		var type      = evType.toLowerCase(),
+			isopen    = (type === 'open'),
+			dataIsObj = (typeof data === 'object'),
+			handlers  = listeners[type] || [],
+			dones     = [],
+			i, l, jst, event;
+		
+		this.debug('event-'+type, data);
+		
+		if (! dataIsObj || typeof allowModify === 'undefined') {
+			allowModify = true;
+		}
+		if (l = handlers.length) {
+			event = $.Event(type);
+			if (data) {
+				data._event = event;
+			}
+			if (allowModify) {
+				event.data = data;
+			}
+
+			for (i = 0; i < l; i++) {
+				if (! handlers[i]) {
+					// probably un-binded this handler
+					continue;
+				}
+
+				// handler is $.Deferred(), call all functions upon completion
+				if (handlers[i].done) {
+					dones.push(handlers[i].done);
+					continue;
+				}
+				
+				// set `event.data` only callback has argument
+				if (handlers[i].length) {
+					if (!allowModify) {
+						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+						if (typeof jst === 'undefined') {
+							try {
+								jst = JSON.stringify(data);
+							} catch(e) {
+								jst = false;
+							}
+						}
+						event.data = jst? JSON.parse(jst) : data;
+					}
+				}
+
+				try {
+					if (handlers[i].call(event, event, this) === false || event.isDefaultPrevented()) {
+						this.debug('event-stoped', event.type);
+						break;
+					}
+				} catch (ex) {
+					window.console && window.console.log && window.console.log(ex);
+				}
+				
+			}
+			
+			// call done functions
+			if (l = dones.length) {
+				for (i = 0; i < l; i++) {
+					try {
+						if (dones[i].call(event, event, this) === false || event.isDefaultPrevented()) {
+							this.debug('event-stoped', event.type + '(done)');
+							break;
+						}
+					} catch (ex) {
+						window.console && window.console.log && window.console.log(ex);
+					}
+				}
+			}
+
+			if (this.toUnbindEvents[type] && this.toUnbindEvents[type].length) {
+				$.each(this.toUnbindEvents[type], function(i, v) {
+					self.unbind(v.type, v.callback);
+				});
+				delete this.toUnbindEvents[type];
+			}
+		}
+		return this;
+	};
+	
+	/**
+	 * Get event listeners
+	 *
+	 * @param  String   event type
+	 * @return Array    listed event functions
+	 */
+	this.getListeners = function(event) {
+		return event? listeners[event.toLowerCase()] : listeners;
+	};
+
+	// set fm.baseUrl
+	this.baseUrl = (function() {
+		var myTag, base, baseUrl;
+		
+		if (self.options.baseUrl) {
+			return self.options.baseUrl;
+		} else {
+			baseUrl = '';
+			myTag = null;
+			$('head > script').each(function() {
+				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js$/i)) {
+					myTag = $(this);
+					return false;
+				}
+			});
+			if (myTag) {
+				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
+				if (! baseUrl.match(/^(https?\/\/|\/)/)) {
+					// check <base> tag
+					if (base = $('head > base[href]').attr('href')) {
+						baseUrl = base.replace(/\/$/, '') + '/' + baseUrl; 
+					}
+				}
+			}
+			if (baseUrl !== '') {
+				self.options.baseUrl = baseUrl;
+			} else {
+				if (! self.options.baseUrl) {
+					self.options.baseUrl = './';
+				}
+				baseUrl = self.options.baseUrl;
+			}
+			return baseUrl;
+		}
+	})();
+	
+	this.i18nBaseUrl = (this.options.i18nBaseUrl || this.baseUrl + 'js/i18n').replace(/\/$/, '') + '/';
+
+	this.options.maxErrorDialogs = Math.max(1, parseInt(this.options.maxErrorDialogs || 5));
+
+	// set dispInlineRegex
+	cwdOptionsDefault.dispInlineRegex = this.options.dispInlineRegex;
+
+	// auto load required CSS
+	if (this.options.cssAutoLoad) {
+		(function() {
+			var baseUrl = self.baseUrl,
+				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length,
+				rmTag = function() {
+					if (node.data('cssautoloadHide')) {
+						node.data('cssautoloadHide').remove();
+						node.removeData('cssautoloadHide');
+					}
+				},
+				loaded = function() {
+					if (!self.cssloaded) {
+						rmTag();
+						self.cssloaded = true;
+						self.trigger('cssloaded');
+					}
+				};
+			
+			if (! myCss) {
+				// to request CSS auto loading
+				self.cssloaded = null;
+			}
+
+			// additional CSS files
+			if (Array.isArray(self.options.cssAutoLoad)) {
+				if (self.cssloaded === true) {
+					self.loadCss(self.options.cssAutoLoad);
+				} else {
+					self.bind('cssloaded', function() {
+						self.loadCss(self.options.cssAutoLoad);
+					});
+				}
+			}
+
+			// try to load main css
+			if (self.cssloaded === null) {
+				// hide elFinder node while css loading
+				node.addClass('elfinder')
+					.data('cssautoloadHide', $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>'));
+				$('head').append(node.data('cssautoloadHide'));
+
+				// set default theme
+				if (!self.options.themes.default) {
+					self.options.themes = Object.assign({
+						'default' : {
+							'name': 'default',
+							'cssurls': 'css/theme.css',
+							'author': 'elFinder Project',
+							'license': '3-clauses BSD'
+						}
+					}, self.options.themes);
+					if (!self.options.theme) {
+						self.options.theme = 'default';
+					}
+				}
+
+				// Delay 'visibility' check it required for browsers such as Safari
+				requestAnimationFrame(function() {
+					if (node.css('visibility') === 'hidden') {
+						// load CSS
+						self.loadCss([baseUrl+'css/elfinder.min.css'], {
+							dfd: $.Deferred().done(function() {
+								loaded();
+							}).fail(function() {
+								rmTag();
+								if (!self.cssloaded) {
+									self.cssloaded = false;
+									self.bind('init', function() {
+										if (!self.cssloaded) {
+											self.error(['errRead', 'CSS (elfinder.min)']);
+										}
+									});
+								}
+							})
+						});
+					} else {
+						loaded();
+					}
+				});
+			}
+		})();
+	}
+
+	// load theme if exists
+	(function() {
+		var theme,
+			themes = self.options.themes,
+			ids = Object.keys(themes || {});
+		if (ids.length) {
+			theme = self.storage('theme') || self.options.theme;
+			if (!themes[theme]) {
+				theme = ids[0];
+			}
+			if (self.cssloaded) {
+				self.changeTheme(theme);
+			} else {
+				self.bind('cssloaded', function() {
+					self.changeTheme(theme);
+				});
+			}
+		}
+	})();
+	
+	/**
+	 * Volume option to set the properties of the root Stat
+	 * 
+	 * @type Object
+	 */
+	this.optionProperties = {
+		icon: void(0),
+		csscls: void(0),
+		tmbUrl: void(0),
+		uiCmdMap: {},
+		netkey: void(0),
+		disabled: []
+	};
+	
+	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
+		this.options.enableAlways = true;
+	}
+	
+	// make options.debug
+	if (this.options.debug === true) {
+		this.options.debug = 'all';
+	} else if (Array.isArray(this.options.debug)) {
+		(function() {
+			var d = {};
+			$.each(self.options.debug, function() {
+				d[this] = true;
+			});
+			self.options.debug = d;
+		})();
+	} else {
+		this.options.debug = false;
+	}
+	
+	/**
+	 * Original functions evacuated by conflict check
+	 * 
+	 * @type Object
+	 */
+	this.noConflicts = {};
+	
+	/**
+	 * Check and save conflicts with bootstrap etc
+	 * 
+	 * @type Function
+	 */
+	this.noConflict = function() {
+		$.each(conflictChecks, function(i, p) {
+			if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
+				self.noConflicts[p] = $.fn[p].noConflict();
+			}
+		});
+	};
+	// do check conflict
+	this.noConflict();
+	
+	/**
+	 * Is elFinder over CORS
+	 *
+	 * @type Boolean
+	 **/
+	this.isCORS = false;
+	
+	// configure for CORS
+	(function(){
+		if (typeof self.options.cors !== 'undefined' && self.options.cors !== null) {
+			self.isCORS = self.options.cors? true : false;
+		} else {
+			var parseUrl = document.createElement('a'),
+				parseUploadUrl,
+				selfProtocol = window.location.protocol,
+				portReg = function(protocol) {
+					protocol = (!protocol || protocol === ':')? selfProtocol : protocol;
+					return protocol === 'https:'? /\:443$/ : /\:80$/;
+				},
+				selfHost = window.location.host.replace(portReg(selfProtocol), '');
+			parseUrl.href = opts.url;
+			if (opts.urlUpload && (opts.urlUpload !== opts.url)) {
+				parseUploadUrl = document.createElement('a');
+				parseUploadUrl.href = opts.urlUpload;
+			}
+			if (selfHost !== parseUrl.host.replace(portReg(parseUrl.protocol), '')
+				|| (parseUrl.protocol !== ':'&& parseUrl.protocol !== '' && (selfProtocol !== parseUrl.protocol))
+				|| (parseUploadUrl && 
+					(selfHost !== parseUploadUrl.host.replace(portReg(parseUploadUrl.protocol), '')
+					|| (parseUploadUrl.protocol !== ':' && parseUploadUrl.protocol !== '' && (selfProtocol !== parseUploadUrl.protocol))
+					)
+				)
+			) {
+				self.isCORS = true;
+			}
+		}
+		if (self.isCORS) {
+			if (!$.isPlainObject(self.options.customHeaders)) {
+				self.options.customHeaders = {};
+			}
+			if (!$.isPlainObject(self.options.xhrFields)) {
+				self.options.xhrFields = {};
+			}
+			self.options.requestType = 'post';
+			self.options.customHeaders['X-Requested-With'] = 'XMLHttpRequest';
+			self.options.xhrFields['withCredentials'] = true;
+		}
+	})();
+
+	/**
+	 * Ajax request type
+	 *
+	 * @type String
+	 * @default "get"
+	 **/
+	this.requestType = /^(get|post)$/i.test(this.options.requestType) ? this.options.requestType.toLowerCase() : 'get';
+	
+	// set `requestMaxConn` by option
+	requestMaxConn = Math.max(parseInt(this.options.requestMaxConn), 1);
+	
+	/**
+	 * Custom data that given as options
+	 * 
+	 * @type Object
+	 * @default {}
+	 */
+	this.optsCustomData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
+
+	/**
+	 * Any data to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	 **/
+	this.customData = Object.assign({}, this.optsCustomData);
+
+	/**
+	 * Previous custom data from connector
+	 * 
+	 * @type Object|null
+	 */
+	this.prevCustomData = null;
+
+	/**
+	 * Any custom headers to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	*/
+	this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
+
+	/**
+	 * Any custom xhrFields to send across every ajax request
+	 *
+	 * @type Object
+	 * @default {}
+	 */
+	this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
+
+	/**
+	 * Replace XMLHttpRequest.prototype.send to extended function for 3rd party libs XHR request etc.
+	 * 
+	 * @type Function
+	 */
+	this.replaceXhrSend = function() {
+		if (! savedXhrSend) {
+			savedXhrSend = XMLHttpRequest.prototype.send;
+		}
+		XMLHttpRequest.prototype.send = function() {
+			var xhr = this;
+			// set request headers
+			if (self.customHeaders) {
+				$.each(self.customHeaders, function(key) {
+					xhr.setRequestHeader(key, this);
+				});
+			}
+			// set xhrFields
+			if (self.xhrFields) {
+				$.each(self.xhrFields, function(key) {
+					if (key in xhr) {
+						xhr[key] = this;
+					}
+				});
+			}
+			return savedXhrSend.apply(this, arguments);
+		};
+	};
+	
+	/**
+	 * Restore saved original XMLHttpRequest.prototype.send
+	 * 
+	 * @type Function
+	 */
+	this.restoreXhrSend = function() {
+		savedXhrSend && (XMLHttpRequest.prototype.send = savedXhrSend);
+	};
+
+	/**
+	 * command names for into queue for only cwd requests
+	 * these commands aborts before `open` request
+	 *
+	 * @type Array
+	 * @default ['tmb', 'parents']
+	 */
+	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents'];
+
+	/**
+	 * ui.nav id prefix
+	 * 
+	 * @type String
+	 */
+	this.navPrefix = 'nav' + (elFinder.prototype.uniqueid? elFinder.prototype.uniqueid : '') + '-';
+	
+	/**
+	 * ui.cwd id prefix
+	 * 
+	 * @type String
+	 */
+	this.cwdPrefix = elFinder.prototype.uniqueid? ('cwd' + elFinder.prototype.uniqueid + '-') : '';
+	
+	// Increment elFinder.prototype.uniqueid
+	++elFinder.prototype.uniqueid;
+	
+	/**
+	 * URL to upload files
+	 *
+	 * @type String
+	 **/
+	this.uploadURL = opts.urlUpload || opts.url;
+	
+	/**
+	 * Events namespace
+	 *
+	 * @type String
+	 **/
+	this.namespace = namespace;
+
+	/**
+	 * Today timestamp
+	 *
+	 * @type Number
+	 **/
+	this.today = (new Date(date.getFullYear(), date.getMonth(), date.getDate())).getTime()/1000;
+	
+	/**
+	 * Yesterday timestamp
+	 *
+	 * @type Number
+	 **/
+	this.yesterday = this.today - 86400;
+	
+	utc = this.options.UTCDate ? 'UTC' : '';
+	
+	this.getHours    = 'get'+utc+'Hours';
+	this.getMinutes  = 'get'+utc+'Minutes';
+	this.getSeconds  = 'get'+utc+'Seconds';
+	this.getDate     = 'get'+utc+'Date';
+	this.getDay      = 'get'+utc+'Day';
+	this.getMonth    = 'get'+utc+'Month';
+	this.getFullYear = 'get'+utc+'FullYear';
+	
+	/**
+	 * elFinder node z-index (auto detect on elFinder load)
+	 *
+	 * @type null | Number
+	 **/
+	this.zIndex;
+
+	/**
+	 * Current search status
+	 * 
+	 * @type Object
+	 */
+	this.searchStatus = {
+		state  : 0, // 0: search ended, 1: search started, 2: in search result
+		query  : '',
+		target : '',
+		mime   : '',
+		mixed  : false, // in multi volumes search: false or Array that target volume ids
+		ininc  : false // in incremental search
+	};
+
+	/**
+	 * Interface language
+	 *
+	 * @type String
+	 * @default "en"
+	 **/
+	this.lang = this.storage('lang') || this.options.lang;
+	if (this.lang === 'jp') {
+		this.lang = this.options.lang = 'ja';
+	}
+
+	this.viewType = this.storage('view') || this.options.defaultView || 'icons';
+
+	this.sortType = this.storage('sortType') || this.options.sortType || 'name';
+	
+	this.sortOrder = this.storage('sortOrder') || this.options.sortOrder || 'asc';
+
+	this.sortStickFolders = this.storage('sortStickFolders');
+	if (this.sortStickFolders === null) {
+		this.sortStickFolders = !!this.options.sortStickFolders;
+	} else {
+		this.sortStickFolders = !!this.sortStickFolders;
+	}
+
+	this.sortAlsoTreeview = this.storage('sortAlsoTreeview');
+	if (this.sortAlsoTreeview === null || this.options.sortAlsoTreeview === null) {
+		this.sortAlsoTreeview = !!this.options.sortAlsoTreeview;
+	} else {
+		this.sortAlsoTreeview = !!this.sortAlsoTreeview;
+	}
+
+	this.sortRules = $.extend(true, {}, this._sortRules, this.options.sortRules);
+	
+	$.each(this.sortRules, function(name, method) {
+		if (typeof method != 'function') {
+			delete self.sortRules[name];
+		} 
+	});
+	
+	this.compare = $.proxy(this.compare, this);
+	
+	/**
+	 * Delay in ms before open notification dialog
+	 *
+	 * @type Number
+	 * @default 500
+	 **/
+	this.notifyDelay = this.options.notifyDelay > 0 ? parseInt(this.options.notifyDelay) : 500;
+	
+	/**
+	 * Dragging UI Helper object
+	 *
+	 * @type jQuery | null
+	 **/
+	this.draggingUiHelper = null;
+	
+	/**
+	 * Base droppable options
+	 *
+	 * @type Object
+	 **/
+	this.droppable = {
+		greedy     : true,
+		tolerance  : 'pointer',
+		accept     : '.elfinder-cwd-file-wrapper,.elfinder-navbar-dir,.elfinder-cwd-file,.elfinder-cwd-filename',
+		hoverClass : this.res('class', 'adroppable'),
+		classes    : { // Deprecated hoverClass jQueryUI>=1.12.0
+			'ui-droppable-hover': this.res('class', 'adroppable')
+		},
+		autoDisable: true, // elFinder original, see jquery.elfinder.js
+		drop : function(e, ui) {
+			var dst     = $(this),
+				targets = $.grep(ui.helper.data('files')||[], function(h) { return h? true : false; }),
+				result  = [],
+				dups    = [],
+				faults  = [],
+				isCopy  = ui.helper.hasClass('elfinder-drag-helper-plus'),
+				c       = 'class',
+				cnt, hash, i, h;
+			
+			if (typeof e.button === 'undefined' || ui.helper.data('namespace') !== namespace || ! self.insideWorkzone(e.pageX, e.pageY)) {
+				return false;
+			}
+			if (dst.hasClass(self.res(c, 'cwdfile'))) {
+				hash = self.cwdId2Hash(dst.attr('id'));
+			} else if (dst.hasClass(self.res(c, 'navdir'))) {
+				hash = self.navId2Hash(dst.attr('id'));
+			} else {
+				hash = cwd;
+			}
+
+			cnt = targets.length;
+			
+			while (cnt--) {
+				h = targets[cnt];
+				// ignore drop into itself or in own location
+				if (h != hash && files[h].phash != hash) {
+					result.push(h);
+				} else {
+					((isCopy && h !== hash && files[hash].write)? dups : faults).push(h);
+				}
+			}
+			
+			if (faults.length) {
+				return false;
+			}
+			
+			ui.helper.data('droped', true);
+			
+			if (dups.length) {
+				ui.helper.hide();
+				self.exec('duplicate', dups, {_userAction: true});
+			}
+			
+			if (result.length) {
+				ui.helper.hide();
+				self.clipboard(result, !isCopy);
+				self.exec('paste', hash, {_userAction: true}, hash).always(function(){
+					self.clipboard([]);
+					self.trigger('unlockfiles', {files : targets});
+				});
+				self.trigger('drop', {files : targets});
+			}
+		}
+	};
+	
+	/**
+	 * Return true if filemanager is active
+	 *
+	 * @return Boolean
+	 **/
+	this.enabled = function() {
+		return enabled && this.visible();
+	};
+	
+	/**
+	 * Return true if filemanager is visible
+	 *
+	 * @return Boolean
+	 **/
+	this.visible = function() {
+		return node[0].elfinder && node.is(':visible');
+	};
+	
+	/**
+	 * Return file is root?
+	 * 
+	 * @param  Object  target file object
+	 * @return Boolean
+	 */
+	this.isRoot = function(file) {
+		return (file.isroot || ! file.phash)? true : false;
+	};
+	
+	/**
+	 * Return root dir hash for current working directory
+	 * 
+	 * @param  String   target hash
+	 * @param  Boolean  include fake parent (optional)
+	 * @return String
+	 */
+	this.root = function(hash, fake) {
+		hash = hash || cwd;
+		var dir, i;
+		
+		if (! fake) {
+			$.each(self.roots, function(id, rhash) {
+				if (hash.indexOf(id) === 0) {
+					dir = rhash;
+					return false;
+				}
+			});
+			if (dir) {
+				return dir;
+			}
+		}
+		
+		dir = files[hash];
+		while (dir && dir.phash && (fake || ! dir.isroot)) {
+			dir = files[dir.phash];
+		}
+		if (dir) {
+			return dir.hash;
+		}
+		
+		while (i in files && files.hasOwnProperty(i)) {
+			dir = files[i];
+			if (dir.mime === 'directory' && !dir.phash && dir.read) {
+				return dir.hash;
+			}
+		}
+		
+		return '';
+	};
+	
+	/**
+	 * Return current working directory info
+	 * 
+	 * @return Object
+	 */
+	this.cwd = function() {
+		return files[cwd] || {};
+	};
+	
+	/**
+	 * Return required cwd option
+	 * 
+	 * @param  String  option name
+	 * @param  String  target hash (optional)
+	 * @return mixed
+	 */
+	this.option = function(name, target) {
+		var res, item;
+		target = target || cwd;
+		if (self.optionsByHashes[target] && typeof self.optionsByHashes[target][name] !== 'undefined') {
+			return self.optionsByHashes[target][name];
+		}
+		if (self.hasVolOptions && cwd !== target && (!(item = self.file(target)) || item.phash !== cwd)) {
+			res = '';
+			$.each(self.volOptions, function(id, opt) {
+				if (target.indexOf(id) === 0) {
+					res = opt[name] || '';
+					return false;
+				}
+			});
+			return res;
+		} else {
+			return cwdOptions[name] || '';
+		}
+	};
+	
+	/**
+	 * Return disabled commands by each folder
+	 * 
+	 * @param  Array  target hashes
+	 * @return Array
+	 */
+	this.getDisabledCmds = function(targets, flip) {
+		var disabled = {'hidden': true};
+		if (! Array.isArray(targets)) {
+			targets = [ targets ];
+		}
+		$.each(targets, function(i, h) {
+			var disCmds = self.option('disabledFlip', h);
+			if (disCmds) {
+				Object.assign(disabled, disCmds);
+			}
+		});
+		return flip? disabled : Object.keys(disabled);
+	};
+	
+	/**
+	 * Return file data from current dir or tree by it's hash
+	 * 
+	 * @param  String  file hash
+	 * @return Object
+	 */
+	this.file = function(hash, alsoHidden) { 
+		return hash? (files[hash] || (alsoHidden? hiddenFiles[hash] : void(0))) : void(0); 
+	};
+	
+	/**
+	 * Return all cached files
+	 * 
+	 * @param  String  parent hash
+	 * @return Object
+	 */
+	this.files = function(phash) {
+		var items = {};
+		if (phash) {
+			if (!ownFiles[phash]) {
+				return {};
+			}
+			$.each(ownFiles[phash], function(h) {
+				if (files[h]) {
+					items[h] = files[h];
+				} else {
+					delete ownFiles[phash][h];
+				}
+			});
+			return Object.assign({}, items);
+		}
+		return Object.assign({}, files);
+	};
+	
+	/**
+	 * Return list of file parents hashes include file hash
+	 * 
+	 * @param  String  file hash
+	 * @return Array
+	 */
+	this.parents = function(hash) {
+		var parents = [],
+			dir;
+		
+		while (hash && (dir = this.file(hash))) {
+			parents.unshift(dir.hash);
+			hash = dir.phash;
+		}
+		return parents;
+	};
+	
+	this.path2array = function(hash, i18) {
+		var file, 
+			path = [];
+			
+		while (hash) {
+			if ((file = files[hash]) && file.hash) {
+				path.unshift(i18 && file.i18 ? file.i18 : file.name);
+				hash = file.isroot? null : file.phash;
+			} else {
+				path = [];
+				break;
+			}
+		}
+			
+		return path;
+	};
+	
+	/**
+	 * Return file path or Get path async with jQuery.Deferred
+	 * 
+	 * @param  Object  file
+	 * @param  Boolean i18
+	 * @param  Object  asyncOpt
+	 * @return String|jQuery.Deferred
+	 */
+	this.path = function(hash, i18, asyncOpt) { 
+		var path = files[hash] && files[hash].path
+			? files[hash].path
+			: this.path2array(hash, i18).join(cwdOptions.separator);
+		if (! asyncOpt || ! files[hash]) {
+			return path;
+		} else {
+			asyncOpt = Object.assign({notify: {type : 'parents', cnt : 1, hideCnt : true}}, asyncOpt);
+			
+			var dfd    = $.Deferred(),
+				notify = asyncOpt.notify,
+				noreq  = false,
+				req    = function() {
+					self.request({
+						data : {cmd : 'parents', target : files[hash].phash},
+						notify : notify,
+						preventFail : true
+					})
+					.done(done)
+					.fail(function() {
+						dfd.reject();
+					});
+				},
+				done   = function() {
+					self.one('parentsdone', function() {
+						path = self.path(hash, i18);
+						if (path === '' && noreq) {
+							//retry with request
+							noreq = false;
+							req();
+						} else {
+							if (notify) {
+								clearTimeout(ntftm);
+								notify.cnt = -(parseInt(notify.cnt || 0));
+								self.notify(notify);
+							}
+							dfd.resolve(path);
+						}
+					});
+				},
+				ntftm;
+		
+			if (path) {
+				return dfd.resolve(path);
+			} else {
+				if (self.ui['tree']) {
+					// try as no request
+					if (notify) {
+						ntftm = setTimeout(function() {
+							self.notify(notify);
+						}, self.notifyDelay);
+					}
+					noreq = true;
+					done(true);
+				} else {
+					req();
+				}
+				return dfd;
+			}
+		}
+	};
+	
+	/**
+	 * Return file url if set
+	 * 
+	 * @param  String  file hash
+	 * @param  Object  Options
+	 * @return String|Object of jQuery Deferred
+	 */
+	this.url = function(hash, o) {
+		var file   = files[hash],
+			opts   = o || {},
+			async  = opts.async || false,
+			temp   = opts.temporary || false,
+			onetm  = (opts.onetime && self.option('onetimeUrl', hash)) || false,
+			absurl = opts.absurl || false,
+			dfrd   = (async || onetm)? $.Deferred() : null,
+			filter = function(url) {
+				if (url && absurl) {
+					url = self.convAbsUrl(url);
+				}
+				return url;
+			},
+			getUrl = function(url) {
+				if (url) {
+					return filter(url);
+				}
+				if (file.url) {
+					return filter(file.url);
+				}
+				
+				if (typeof baseUrl === 'undefined') {
+					baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash);
+				}
+				
+				if (baseUrl) {
+					return filter(baseUrl + $.map(self.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/'));
+				}
+
+				var params = Object.assign({}, self.customData, {
+					cmd: 'file',
+					target: file.hash
+				});
+				if (self.oldAPI) {
+					params.cmd = 'open';
+					params.current = file.phash;
+				}
+				return filter(self.options.url + (self.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true));
+			}, 
+			baseUrl, res;
+		
+		if (!file || !file.read) {
+			return async? dfrd.resolve('') : '';
+		}
+		
+		if (onetm) {
+			async = true;
+			this.request({
+				data : { cmd : 'url', target : hash, options : { onetime: 1 } },
+				preventDefault : true,
+				options: {async: async},
+				notify: {type : 'file', cnt : 1, hideCnt : true}
+			}).done(function(data) {
+				dfrd.resolve(filter(data.url || ''));
+			}).fail(function() {
+				dfrd.resolve('');
+			});
+		} else {
+			if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash)))) {
+				this.request({
+					data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
+					preventDefault : true,
+					options: {async: async},
+					notify: async? {type : temp? 'file' : 'url', cnt : 1, hideCnt : true} : {}
+				})
+				.done(function(data) {
+					file.url = data.url || '';
+				})
+				.fail(function() {
+					file.url = '';
+				})
+				.always(function() {
+					var url;
+					if (file.url && temp) {
+						url = file.url;
+						file.url = '1'; // restore
+					}
+					if (async) {
+						dfrd.resolve(getUrl(url));
+					} else {
+						return getUrl(url);
+					}
+				});
+			} else {
+				if (async) {
+					dfrd.resolve(getUrl());
+				} else {
+					return getUrl();
+				}
+			}
+		}
+		if (async) {
+			return dfrd;
+		}
+	};
+	
+	/**
+	 * Return file url for the extarnal service
+	 *
+	 * @param      String  hash     The hash
+	 * @param      Object  options  The options
+	 * @return     Object  jQuery Deferred
+	 */
+	this.forExternalUrl = function(hash, options) {
+		var onetime = self.option('onetimeUrl', hash),
+			opts = {
+				async: true,
+				absurl: true
+			};
+
+		opts[onetime? 'onetime' : 'temporary'] = true;
+		return self.url(hash, Object.assign({}, options, opts));
+	};
+
+	/**
+	 * Return file url for open in elFinder
+	 * 
+	 * @param  String  file hash
+	 * @param  Boolean for download link
+	 * @return String
+	 */
+	this.openUrl = function(hash, download) {
+		var file = files[hash],
+			url  = '';
+		
+		if (!file || !file.read) {
+			return '';
+		}
+		
+		if (!download) {
+			if (file.url) {
+				if (file.url != 1) {
+					url = file.url;
+				}
+			} else if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
+				url = cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
+			}
+			if (url) {
+				url += (url.match(/\?/)? '&' : '?') + '_'.repeat((url.match(/[\?&](_+)t=/g) || ['&t=']).sort().shift().match(/[\?&](_*)t=/)[1].length + 1) + 't=' + (file.ts || parseInt(+new Date()/1000));
+				return url;
+			}
+		}
+		
+		url = this.options.url;
+		url = url + (url.indexOf('?') === -1 ? '?' : '&')
+			+ (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
+			+ '&target=' + file.hash
+			+ '&_t=' + (file.ts || parseInt(+new Date()/1000));
+		
+		if (download) {
+			url += '&download=1';
+		}
+		
+		$.each(this.customData, function(key, val) {
+			url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+		});
+		
+		return url;
+	};
+	
+	/**
+	 * Return thumbnail url
+	 * 
+	 * @param  Object  file object
+	 * @return String
+	 */
+	this.tmb = function(file) {
+		var tmbUrl, tmbCrop,
+			cls    = 'elfinder-cwd-bgurl',
+			url    = '';
+
+		if ($.isPlainObject(file)) {
+			if (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0) {
+				tmbUrl = self.option('tmbUrl', file.hash);
+				tmbCrop = self.option('tmbCrop', file.hash);
+			} else {
+				tmbUrl = cwdOptions['tmbUrl'];
+				tmbCrop = cwdOptions['tmbCrop'];
+			}
+			if (tmbCrop) {
+				cls += ' elfinder-cwd-bgurl-crop';
+			}
+			if (tmbUrl === 'self' && file.mime.indexOf('image/') === 0) {
+				url = self.openUrl(file.hash);
+				cls += ' elfinder-cwd-bgself';
+			} else if ((self.oldAPI || tmbUrl) && file && file.tmb && file.tmb != 1) {
+				url = tmbUrl + file.tmb;
+			} else if (self.newAPI && file && file.tmb && file.tmb != 1) {
+				url = file.tmb;
+			}
+			if (url) {
+				if (file.ts && tmbUrl !== 'self') {
+					url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
+				}
+				return { url: url, className: cls };
+			}
+		}
+		
+		return false;
+	};
+	
+	/**
+	 * Return selected files hashes
+	 *
+	 * @return Array
+	 **/
+	this.selected = function() {
+		return selected.slice(0);
+	};
+	
+	/**
+	 * Return selected files info
+	 * 
+	 * @return Array
+	 */
+	this.selectedFiles = function() {
+		return $.map(selected, function(hash) { return files[hash] ? Object.assign({}, files[hash]) : null; });
+	};
+	
+	/**
+	 * Return true if file with required name existsin required folder
+	 * 
+	 * @param  String  file name
+	 * @param  String  parent folder hash
+	 * @return Boolean
+	 */
+	this.fileByName = function(name, phash) {
+		var hash;
+	
+		for (hash in files) {
+			if (files.hasOwnProperty(hash) && files[hash].phash == phash && files[hash].name == name) {
+				return files[hash];
+			}
+		}
+	};
+	
+	/**
+	 * Valid data for required command based on rules
+	 * 
+	 * @param  String  command name
+	 * @param  Object  cammand's data
+	 * @return Boolean
+	 */
+	this.validResponse = function(cmd, data) {
+		return data.error || this.rules[this.rules[cmd] ? cmd : 'defaults'](data);
+	};
+	
+	/**
+	 * Return bytes from ini formated size
+	 * 
+	 * @param  String  ini formated size
+	 * @return Integer
+	 */
+	this.returnBytes = function(val) {
+		var last;
+		if (isNaN(val)) {
+			if (! val) {
+				val = '';
+			}
+			// for ex. 1mb, 1KB
+			val = val.replace(/b$/i, '');
+			last = val.charAt(val.length - 1).toLowerCase();
+			val = val.replace(/[tgmk]$/i, '');
+			if (last == 't') {
+				val = val * 1024 * 1024 * 1024 * 1024;
+			} else if (last == 'g') {
+				val = val * 1024 * 1024 * 1024;
+			} else if (last == 'm') {
+				val = val * 1024 * 1024;
+			} else if (last == 'k') {
+				val = val * 1024;
+			}
+			val = isNaN(val)? 0 : parseInt(val);
+		} else {
+			val = parseInt(val);
+			if (val < 1) val = 0;
+		}
+		return val;
+	};
+	
+	/**
+	 * Process ajax request.
+	 * Fired events :
+	 * @todo
+	 * @example
+	 * @todo
+	 * @return $.Deferred
+	 */
+	this.request = function(opts) { 
+		var self     = this,
+			o        = this.options,
+			dfrd     = $.Deferred(),
+			// request ID
+			reqId    = (+ new Date()).toString(16) + Math.floor(1000 * Math.random()).toString(16), 
+			// request data
+			data     = Object.assign({}, self.customData, {mimes : o.onlyMimes}, opts.data || opts),
+			// command name
+			cmd      = data.cmd,
+			// request type is binary
+			isBinary = (opts.options || {}).dataType === 'binary',
+			// current cmd is "open"
+			isOpen   = (!opts.asNotOpen && cmd === 'open'),
+			// call default fail callback (display error dialog) ?
+			deffail  = !(isBinary || opts.preventDefault || opts.preventFail),
+			// call default success callback ?
+			defdone  = !(isBinary || opts.preventDefault || opts.preventDone),
+			// options for notify dialog
+			notify   = Object.assign({}, opts.notify),
+			// make cancel button
+			cancel   = !!opts.cancel,
+			// do not normalize data - return as is
+			raw      = isBinary || !!opts.raw,
+			// sync files on request fail
+			syncOnFail = opts.syncOnFail,
+			// use lazy()
+			lazy     = !!opts.lazy,
+			// prepare function before done()
+			prepare  = opts.prepare,
+			// navigate option object when cmd done
+			navigate = opts.navigate,
+			// open notify dialog timeout
+			timeout,
+			// use browser cache
+			useCache = (opts.options || {}).cache,
+			// request options
+			options = Object.assign({
+				url      : o.url,
+				async    : true,
+				type     : this.requestType,
+				dataType : 'json',
+				cache    : (self.api >= 2.1029), // api >= 2.1029 has unique request ID
+				data     : data,
+				headers  : this.customHeaders,
+				xhrFields: this.xhrFields
+			}, opts.options || {}),
+			/**
+			 * Default success handler. 
+			 * Call default data handlers and fire event with command name.
+			 *
+			 * @param Object  normalized response data
+			 * @return void
+			 **/
+			done = function(data) {
+				data.warning && self.error(data.warning);
+				
+				if (isOpen) {
+					open(data);
+				} else {
+					self.updateCache(data);
+				}
+				
+				data.changed && data.changed.length && change(data.changed);
+				
+				self.lazy(function() {
+					// fire some event to update cache/ui
+					data.removed && data.removed.length && self.remove(data);
+					data.added   && data.added.length   && self.add(data);
+					data.changed && data.changed.length && self.change(data);
+				}).then(function() {
+					// fire event with command name
+					return self.lazy(function() {
+						self.trigger(cmd, data, false);
+					});
+				}).then(function() {
+					// fire event with command name + 'done'
+					return self.lazy(function() {
+						self.trigger(cmd + 'done');
+					});
+				}).then(function() {
+					// make toast message
+					if (data.toasts && Array.isArray(data.toasts)) {
+						$.each(data.toasts, function() {
+							this.msg && self.toast(this);
+						});
+					}
+					// force update content
+					data.sync && self.sync();
+				});
+			},
+			/**
+			 * Request error handler. Reject dfrd with correct error message.
+			 *
+			 * @param jqxhr  request object
+			 * @param String request status
+			 * @return void
+			 **/
+			error = function(xhr, status) {
+				var error, data, 
+					d = self.options.debug;
+				
+				switch (status) {
+					case 'abort':
+						error = xhr.quiet ? '' : ['errConnect', 'errAbort'];
+						break;
+					case 'timeout':	    
+						error = ['errConnect', 'errTimeout'];
+						break;
+					case 'parsererror': 
+						error = ['errResponse', 'errDataNotJSON'];
+						if (xhr.responseText) {
+							if (! cwd || (d && (d === 'all' || d['backend-error']))) {
+								error.push(xhr.responseText);
+							}
+						}
+						break;
+					default:
+						if (xhr.responseText) {
+							// check responseText, Is that JSON?
+							try {
+								data = JSON.parse(xhr.responseText);
+								if (data && data.error) {
+									error = data.error;
+								}
+							} catch(e) {}
+						}
+						if (! error) {
+							if (xhr.status == 403) {
+								error = ['errConnect', 'errAccess', 'HTTP error ' + xhr.status];
+							} else if (xhr.status == 404) {
+								error = ['errConnect', 'errNotFound', 'HTTP error ' + xhr.status];
+							} else if (xhr.status >= 500) {
+								error = ['errResponse', 'errServerError', 'HTTP error ' + xhr.status];
+							} else {
+								if (xhr.status == 414 && options.type === 'get') {
+									// retry by POST method
+									options.type = 'post';
+									self.abortXHR(xhr);
+									dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
+									return;
+								}
+								error = xhr.quiet ? '' : ['errConnect', 'HTTP error ' + xhr.status];
+							} 
+						}
+				}
+				
+				self.trigger(cmd + 'done');
+				dfrd.reject({error: error}, xhr, status);
+			},
+			/**
+			 * Request success handler. Valid response data and reject/resolve dfrd.
+			 *
+			 * @param Object  response data
+			 * @param String request status
+			 * @return void
+			 **/
+			success = function(response) {
+				var d = self.options.debug;
+				
+				// Set currrent request command name
+				self.currentReqCmd = cmd;
+				
+				if (response.debug && (!d || d !== 'all')) {
+					if (!d) {
+						d = self.options.debug = {};
+					}
+					d['backend-error'] = true;
+					d['warning'] = true;
+				}
+				
+				if (raw) {
+					self.abortXHR(xhr);
+					response && response.debug && self.debug('backend-debug', response);
+					return dfrd.resolve(response);
+				}
+				
+				if (!response) {
+					return dfrd.reject({error :['errResponse', 'errDataEmpty']}, xhr, response);
+				} else if (!$.isPlainObject(response)) {
+					return dfrd.reject({error :['errResponse', 'errDataNotJSON']}, xhr, response);
+				} else if (response.error) {
+					if (isOpen) {
+						// check leafRoots
+						$.each(self.leafRoots, function(phash, roots) {
+							self.leafRoots[phash] = $.grep(roots, function(h) { return h !== data.target; });
+						});
+					}
+					return dfrd.reject({error :response.error}, xhr, response);
+				}
+				
+				var resolve = function() {
+					var pushLeafRoots = function(name) {
+						if (self.leafRoots[data.target] && response[name]) {
+							$.each(self.leafRoots[data.target], function(i, h) {
+								var root;
+								if (root = self.file(h)) {
+									response[name].push(root);
+								}
+							});
+						}
+					},
+					setTextMimes = function() {
+						self.textMimes = {};
+						$.each(self.res('mimes', 'text'), function() {
+							self.textMimes[this.toLowerCase()] = true;
+						});
+					},
+					actionTarget;
+					
+					if (isOpen) {
+						pushLeafRoots('files');
+					} else if (cmd === 'tree') {
+						pushLeafRoots('tree');
+					}
+					
+					response = self.normalize(response);
+					
+					if (!self.validResponse(cmd, response)) {
+						return dfrd.reject({error :(response.norError || 'errResponse')}, xhr, response);
+					}
+					
+					if (isOpen) {
+						if (!self.api) {
+							self.api    = response.api || 1;
+							if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
+								self.api = '2.1';
+							}
+							self.newAPI = self.api >= 2;
+							self.oldAPI = !self.newAPI;
+						}
+						
+						if (response.textMimes && Array.isArray(response.textMimes)) {
+							self.resources.mimes.text = response.textMimes;
+							setTextMimes();
+						}
+						!self.textMimes && setTextMimes();
+						
+						if (response.options) {
+							cwdOptions = Object.assign({}, cwdOptionsDefault, response.options);
+						}
+
+						if (response.netDrivers) {
+							self.netDrivers = response.netDrivers;
+						}
+
+						if (response.maxTargets) {
+							self.maxTargets = response.maxTargets;
+						}
+
+						if (!!data.init) {
+							self.uplMaxSize = self.returnBytes(response.uplMaxSize);
+							self.uplMaxFile = !!response.uplMaxFile? Math.min(parseInt(response.uplMaxFile), 50) : 20;
+						}
+					}
+
+					if (typeof prepare === 'function') {
+						prepare(response);
+					}
+					
+					if (navigate) {
+						actionTarget = navigate.target || 'added';
+						if (response[actionTarget] && response[actionTarget].length) {
+							self.
